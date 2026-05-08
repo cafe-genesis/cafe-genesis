@@ -1,0 +1,1997 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cafe Genesis</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://apis.google.com/js/api.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Nunito',sans-serif;background:#f0f4f8;color:#2d3748;min-height:100vh}
+
+/* LAYOUT */
+#app{display:flex;min-height:100vh}
+.sidebar{width:220px;min-width:220px;background:#2d3748;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.brand{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,0.1)}
+.brand .icon{font-size:24px}
+.brand h1{color:#fff;font-size:17px;font-weight:800;margin-top:4px}
+.brand p{color:#718096;font-size:10px;letter-spacing:1px;text-transform:uppercase}
+nav{flex:1;padding:12px 10px;overflow-y:auto}
+.nav-group{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#4a5568;padding:12px 8px 4px}
+.nav-btn{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:rgba(255,255,255,0.6);border:none;background:none;width:100%;text-align:left;font-family:'Nunito',sans-serif;transition:all 0.15s}
+.nav-btn:hover{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.9)}
+.nav-btn.active{background:rgba(66,153,225,0.25);color:#90cdf4;font-weight:700}
+.nav-btn .ni{font-size:15px;width:20px;text-align:center}
+.sidebar-foot{padding:14px 18px;border-top:1px solid rgba(255,255,255,0.08);font-size:10px;color:#4a5568}
+
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.topbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+.topbar h2{font-size:16px;font-weight:800;color:#1a202c}
+.topbar-date{font-size:12px;color:#718096;background:#f7fafc;padding:3px 10px;border-radius:6px;border:1px solid #e2e8f0}
+.topbar-actions{display:flex;gap:8px}
+.content{padding:20px 24px;flex:1}
+
+/* PAGES */
+.page{display:none}
+.page.active{display:block}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;transition:all 0.15s;white-space:nowrap}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-xs{padding:3px 8px;font-size:11px;border-radius:5px}
+.btn-dark{background:#2d3748;color:#fff}.btn-dark:hover{background:#1a202c}
+.btn-blue{background:#4299e1;color:#fff}.btn-blue:hover{background:#3182ce}
+.btn-green{background:#48bb78;color:#fff}.btn-green:hover{background:#38a169}
+.btn-red{background:#fc8181;color:#c53030;border:1px solid #feb2b2}.btn-red:hover{background:#feb2b2}
+.btn-ghost{background:#f7fafc;color:#4a5568;border:1px solid #e2e8f0}.btn-ghost:hover{background:#edf2f7}
+.btn-outline-green{background:#f0fff4;color:#276749;border:1px solid #9ae6b4}.btn-outline-green:hover{background:#c6f6d5}
+
+/* CARDS */
+.card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+.card-head{padding:14px 18px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:13px;font-weight:700;color:#2d3748}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.kpi{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:16px 18px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#e2e8f0}
+.kpi.gold::before{background:#ed8936}
+.kpi.green::before{background:#48bb78}
+.kpi.red::before{background:#fc8181}
+.kpi.blue::before{background:#4299e1}
+.kpi-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#718096;margin-bottom:6px}
+.kpi-val{font-size:26px;font-weight:800;color:#1a202c;line-height:1}
+.kpi-val.gold{color:#c05621}.kpi-val.green{color:#276749}.kpi-val.red{color:#c53030}.kpi-val.blue{color:#2b6cb0}
+.kpi-sub{font-size:11px;color:#a0aec0;margin-top:4px}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse}
+thead th{padding:9px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#718096;background:#f7fafc;border-bottom:1px solid #e2e8f0}
+tbody tr{border-bottom:1px solid #e2e8f0;transition:background 0.1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#f7fafc}
+td{padding:10px 14px;font-size:13px;color:#2d3748;vertical-align:middle}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.bg-green{background:#f0fff4;color:#276749}
+.bg-red{background:#fff5f5;color:#c53030}
+.bg-gold{background:#fffaf0;color:#c05621}
+.bg-blue{background:#ebf8ff;color:#2b6cb0}
+.bg-gray{background:#f7fafc;color:#4a5568;border:1px solid #e2e8f0}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;width:90%;max-width:540px;max-height:92vh;overflow-y:auto;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+.modal-lg{max-width:680px}
+.modal-sm{max-width:380px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e2e8f0}
+.modal-head h3{font-size:16px;font-weight:800;color:#1a202c}
+.modal-x{cursor:pointer;color:#a0aec0;font-size:20px;line-height:1}.modal-x:hover{color:#2d3748}
+
+/* FORM */
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.fg label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#4a5568}
+.fg input,.fg select,.fg textarea{padding:10px 12px;border:2px solid #e2e8f0;border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;color:#2d3748;outline:none;width:100%;transition:border-color 0.15s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:#4299e1}
+.fg textarea{resize:vertical;min-height:60px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:16px;border-top:1px solid #e2e8f0}
+
+/* TAMEIO LIST */
+.tam-list{display:flex;flex-direction:column;background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden}
+.tam-list-head{display:grid;grid-template-columns:150px 1fr 80px 80px 80px 70px 160px;padding:7px 12px;background:#f7fafc;border-bottom:2px solid #e2e8f0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#718096;gap:4px}
+.tam-row{display:grid;grid-template-columns:150px 1fr 80px 80px 80px 70px 160px;padding:8px 12px;border-bottom:1px solid #f0f4f8;align-items:center;gap:4px;transition:background 0.1s}
+.tam-row:last-child{border-bottom:none}
+.tam-row:hover{background:#f7fafc}
+.tam-row.pistosi{background:#fffafa}
+.tam-row.exofli{background:#f0fff4}
+.tam-pel{font-size:13px;font-weight:700;color:#1a202c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tam-area{font-size:10px;color:#a0aec0}
+.tam-desc{font-size:11px;color:#4a5568;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tam-amt{font-size:13px;font-weight:800;text-align:right}
+.tam-yp{font-size:12px;font-weight:700;text-align:right}
+.tam-st{text-align:right}
+.tam-act{display:flex;gap:3px;justify-content:flex-end}
+
+/* QUICK ORDER */
+.eidos-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;max-height:280px;overflow-y:auto;margin-bottom:14px}
+.eidos-btn{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:8px;border:2px solid #e2e8f0;background:#f7fafc;cursor:pointer;font-size:12px;color:#4a5568;transition:all 0.12s;font-family:'Nunito',sans-serif;font-weight:600}
+.eidos-btn:hover,.eidos-btn.sel{border-color:#ed8936;background:#fffaf0;color:#2d3748}
+.eidos-btn .ep{color:#c05621;font-weight:800;font-size:11px}
+.ekat{grid-column:1/-1;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#718096;padding:8px 4px 2px;border-bottom:1px solid #e2e8f0}
+.sel-items{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.sel-item{display:flex;align-items:center;justify-content:space-between;background:#f7fafc;border:1px solid #e2e8f0;border-radius:8px;padding:7px 10px;gap:8px}
+.sel-item-name{flex:1;font-size:13px;font-weight:600}
+.sel-item-amt{color:#c05621;font-weight:800}
+.sel-item-ctrl{display:flex;gap:4px}
+.ctrl-btn{width:26px;height:26px;border-radius:5px;border:1px solid #e2e8f0;background:#fff;cursor:pointer;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#4a5568}
+.ctrl-btn:hover{background:#2d3748;color:#fff;border-color:#2d3748}
+.order-total{display:flex;justify-content:space-between;align-items:center;background:#2d3748;color:#fff;border-radius:10px;padding:12px 16px;margin-bottom:14px}
+.order-total .lbl{font-size:12px;color:rgba(255,255,255,0.6)}
+.order-total .amt{font-size:22px;font-weight:800}
+
+/* PAYMENT PILLS */
+.ppills{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.ppill{padding:6px 12px;border-radius:8px;border:2px solid #e2e8f0;background:#f7fafc;cursor:pointer;font-size:13px;font-weight:700;color:#4a5568;font-family:'Nunito',sans-serif}
+.ppill:hover{border-color:#48bb78;color:#276749;background:#f0fff4}
+
+/* YPOLOIPO BOX */
+.yp-box{background:#2d3748;color:#fff;border-radius:12px;padding:16px 20px;text-align:right;min-width:160px}
+.yp-box .lbl{font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:4px}
+.yp-box .amt{font-size:30px;font-weight:800}
+.yp-box .sub{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px}
+
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:2px solid #e2e8f0;margin-bottom:16px}
+.tab{padding:8px 16px;font-size:13px;font-weight:600;color:#718096;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.12s}
+.tab.active{color:#4299e1;border-bottom-color:#4299e1}
+
+/* KLISIMO */
+.kl-box{background:#2d3748;color:#fff;border-radius:12px;padding:24px;margin-bottom:18px}
+.kl-title{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.4);margin-bottom:16px}
+.kl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.kl-item-label{font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px}
+.kl-item-val{font-size:28px;font-weight:800}
+.kl-gold{color:#f6ad55}.kl-green{color:#68d391}.kl-red{color:#fc8181}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px 20px;color:#a0aec0}
+.empty .ico{font-size:36px;margin-bottom:10px;opacity:0.5}
+
+/* MISC */
+.section-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.section-left{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.text-green{color:#276749;font-weight:700}
+.text-red{color:#c53030;font-weight:700}
+.text-gold{color:#c05621;font-weight:700}
+.text-dim{color:#718096}
+.text-sm{font-size:11px}
+input[type=date]{cursor:pointer}
+input[type=date]::-webkit-calendar-picker-indicator{opacity:0.5}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:#2d3748;color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;display:none;box-shadow:0 8px 30px rgba(0,0,0,0.2);max-width:300px}
+
+@media(max-width:900px){
+  .sidebar{width:54px;min-width:54px}
+  .brand h1,.brand p,.nav-btn span,.nav-group,.sidebar-foot{display:none}
+  .brand{padding:14px;text-align:center}
+  .nav-btn{justify-content:center;padding:12px}
+  .main{margin-left:54px}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+  .content{padding:12px}
+  .kpi-row{gap:8px}
+  .topbar{padding:10px 14px}
+  .form-row{grid-template-columns:1fr}
+}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- APP -->
+<div id="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="brand">
+    <div class="icon">☕</div>
+    <h1>Cafe Genesis</h1>
+    <p>v4.0 · 2026</p>
+  </div>
+  <nav>
+    <div class="nav-group">Λειτουργίες</div>
+    <button class="nav-btn active" onclick="goPage('tameio')"><span class="ni">🟢</span><span>Ταμείο Ημέρας</span></button>
+    <button class="nav-btn" onclick="goPage('klisimo')"><span class="ni">🌙</span><span>Κλείσιμο Ημέρας</span></button>
+    <div class="nav-group">Διαχείριση</div>
+    <button class="nav-btn" onclick="goPage('pelates')"><span class="ni">👥</span><span>Πελάτες</span></button>
+    <button class="nav-btn" onclick="goPage('kiniseis')"><span class="ni">📋</span><span>Κινήσεις</span></button>
+    <button class="nav-btn" onclick="goPage('pliromes')"><span class="ni">💳</span><span>Πληρωμές</span></button>
+    <button class="nav-btn" onclick="goPage('eksoda')"><span class="ni">💸</span><span>Έξοδα</span></button>
+    <button class="nav-btn" onclick="goPage('promitheftes')"><span class="ni">🚚</span><span>Προμηθευτές</span></button>
+    <div class="nav-group">Αναφορές</div>
+    <button class="nav-btn" onclick="goPage('statistika')"><span class="ni">📊</span><span>Στατιστικά</span></button>
+    <button class="nav-btn" onclick="goPage('eidi')"><span class="ni">🍵</span><span>Είδη</span></button>
+  </nav>
+  <div class="sidebar-foot">localStorage · v4.0</div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <h2 id="page-title">Ταμείο Ημέρας</h2>
+      <div class="topbar-date" id="topbar-date"></div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="doExport()">⬇ Backup</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('imp-file').click()">⬆ Εισαγωγή</button>
+      <input type="file" id="imp-file" accept=".json" style="display:none" onchange="doImport(event)">
+      <button class="btn btn-ghost btn-sm" id="gdrive-save-btn" onclick="gdriveSave()" style="background:#e8f0fe;color:#1a73e8;border-color:#c5d7f8;display:none">☁️ Drive Save</button>
+      <span id="last-save-indicator" style="display:none;font-size:11px;color:#718096;align-items:center;gap:4px"></span>
+      <button class="btn btn-ghost btn-sm" id="gdrive-load-btn" onclick="gdriveLoad()" style="background:#e8f0fe;color:#1a73e8;border-color:#c5d7f8;display:none">Drive Load</button>
+      <button class="btn btn-ghost btn-sm" id="gdrive-login-btn" onclick="gdriveLogin()" style="background:#1a73e8;color:#fff;border-color:#1a73e8">Drive Sync</button>
+      <span id="gdrive-user" style="font-size:11px;color:#1a73e8;display:none;align-items:center;gap:4px"></span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ΤΑΜΕΙΟ -->
+    <div class="page active" id="page-tameio">
+      <div class="section-top">
+        <div class="section-left">
+          <label class="text-sm text-dim">Ημέρα:</label>
+          <input type="date" id="tam-date" onchange="renderTameio()" style="padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px">
+          <span id="tam-info" class="text-sm text-dim"></span>
+          <button class="btn btn-sm" id="tab-anoixtes" onclick="setTamFilter('open')" style="background:#fff5f5;color:#c53030;border:1px solid #feb2b2;font-weight:700">Ανοιχτές</button>
+          <button class="btn btn-sm" id="tab-oles" onclick="setTamFilter('all')" style="background:#f7fafc;color:#4a5568;border:1px solid #e2e8f0">Όλες</button>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-blue" onclick="openOrder(null)">+ Νέα Παραγγελία</button>
+        </div>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi gold"><div class="kpi-label">Πωλήσεις <span onclick="toggleKpi('tk-pol','tk-pol-raw')" style="cursor:pointer;font-size:14px;margin-left:4px" id="eye-pol">👁</span></div><div class="kpi-val gold" id="tk-pol">€0.00</div><div class="kpi-sub">χωρίς κεράσματα</div></div>
+        <div class="kpi green"><div class="kpi-label">Εισπράχθηκαν <span onclick="toggleKpi('tk-eisp','tk-eisp-raw')" style="cursor:pointer;font-size:14px;margin-left:4px" id="eye-eisp">👁</span></div><div class="kpi-val green" id="tk-eisp">€0.00</div><div class="kpi-sub">πληρωμές ημέρας</div></div>
+        <div class="kpi red"><div class="kpi-label">Σε Πίστωση <span onclick="toggleKpiBlur('tk-pist')" style="cursor:pointer;font-size:13px" title="Απόκρυψη">👁</span></div><div class="kpi-val red" id="tk-pist">€0.00</div><div class="kpi-sub">δεν πλήρωσαν</div></div>
+        <div class="kpi blue"><div class="kpi-label">Κεράσματα <span onclick="toggleKpiBlur('tk-ker')" style="cursor:pointer;font-size:13px" title="Απόκρυψη">👁</span></div><div class="kpi-val blue" id="tk-ker">€0.00</div><div class="kpi-sub">δωρεάν</div></div>
+      </div>
+      <div id="tam-empty" class="empty" style="display:none"><div class="ico">☕</div><p>Δεν υπάρχουν κινήσεις σήμερα.<br>Πάτα «+ Νέα Παραγγελία»!</p></div>
+      <div class="tam-list" id="tam-list" style="display:none">
+        <div class="tam-list-head">
+          <div>Πελάτης</div><div>Είδη</div><div style="text-align:right">Χρέωση</div><div style="text-align:right">Σημερινό</div><div style="text-align:right">Υπόλοιπο</div><div style="text-align:right">Κατάσταση</div><div style="text-align:right">Ενέργειες</div>
+        </div>
+        <div id="tam-rows"></div>
+      </div>
+    </div>
+
+    <!-- ΚΛΕΙΣΙΜΟ -->
+    <div class="page" id="page-klisimo">
+      <div class="section-top">
+        <div class="section-left">
+          <label class="text-sm text-dim">Ημέρα:</label>
+          <input type="date" id="kl-date" onchange="renderKlisimo()" style="padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px">
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨️ Εκτύπωση</button>
+      </div>
+      <div class="kl-box">
+        <div class="kl-title">📊 Σύνοψη Ημέρας</div>
+        <div class="kl-grid">
+          <div><div class="kl-item-label">Σύνολο Πωλήσεων</div><div class="kl-item-val kl-gold" id="kl-total">€0.00</div></div>
+          <div><div class="kl-item-label">Εισπράχθηκαν</div><div class="kl-item-val kl-green" id="kl-eisp">€0.00</div></div>
+          <div><div class="kl-item-label">Έμειναν Ανοιχτά</div><div class="kl-item-val kl-red" id="kl-open">€0.00</div></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+        <div class="card"><div class="card-head"><span class="card-title">💳 Πληρωμές Ημέρας</span><span id="kl-plir-sum" class="text-sm text-dim"></span></div><table><thead><tr><th>Πελάτης</th><th>Ποσό</th><th>Τρόπος</th></tr></thead><tbody id="kl-plir-body"></tbody></table></div>
+        <div class="card"><div class="card-head"><span class="card-title">⚠️ Ανοιχτοί Λογαριασμοί</span></div><table><thead><tr><th>Πελάτης</th><th>Σήμερα</th><th>Σύνολο</th></tr></thead><tbody id="kl-open-body"></tbody></table></div>
+      </div>
+      <div class="card"><div class="card-head"><span class="card-title">📋 Αναλυτικές Κινήσεις</span></div><table><thead><tr><th>Πελάτης</th><th>Είδη</th><th>Χρέωση</th><th>Κέρ.</th><th>Πλήρωσε</th><th>Υπόλοιπο</th></tr></thead><tbody id="kl-kin-body"></tbody></table></div>
+    </div>
+
+    <!-- ΠΕΛΑΤΕΣ -->
+    <div class="page" id="page-pelates">
+      <div class="section-top">
+        <div class="section-left">
+          <input type="text" id="pel-q" placeholder="🔍 Αναζήτηση..." oninput="renderPelates()" style="padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-family:'Nunito',sans-serif;width:220px">
+          <select id="pel-f" onchange="renderPelates()" style="padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-family:'Nunito',sans-serif">
+            <option value="">Όλοι</option><option value="debt">Με υπόλοιπο</option><option value="ok">Εξοφλημένοι</option>
+          </select>
+        </div>
+        <button class="btn btn-dark" onclick="openPelModal()">+ Νέος Πελάτης</button>
+        <button class="btn btn-ghost" onclick="openMetaforaModal()" style="background:#fffbeb;border-color:#f6e05e;color:#744210">Μεταφορα Υπολοιπου</button>
+      </div>
+      <div class="card"><table><thead><tr><th>Όνομα</th><th>Περιοχή</th><th>Τηλέφωνο</th><th>Υπόλοιπο</th><th>Κινήσεις</th><th></th></tr></thead><tbody id="pel-tbody"></tbody></table></div>
+    </div>
+
+    <!-- ΚΑΡΤΕΛΑ ΠΕΛΑΤΗ -->
+    <div class="page" id="page-kartela">
+      <div class="section-top">
+        <button class="btn btn-ghost btn-sm" onclick="goPage('pelates')">← Πίσω</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline-green btn-sm" onclick="openPlirModal()">💳 Πληρωμή</button>
+          <button class="btn btn-blue btn-sm" onclick="openOrder(curPelId)">+ Παραγγελία</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:18px;flex-wrap:wrap">
+        <div><h2 id="kar-name" style="font-size:20px;font-weight:800"></h2><div id="kar-sub" class="text-dim text-sm" style="margin-top:4px"></div></div>
+        <div class="yp-box"><div class="lbl">Τρέχον Υπόλοιπο</div><div class="amt" id="kar-yp">€0.00</div><div class="sub" id="kar-yp-sub"></div></div>
+      </div>
+      <div class="tabs">
+        <div class="tab active" onclick="karTab('kin',this)">Κινήσεις</div>
+        <div class="tab" onclick="karTab('plir',this)">Πληρωμές</div>
+        <div class="tab" onclick="karTab('hist',this)">Ιστορικό</div>
+      </div>
+      <div id="kar-kin"><div class="card"><table><thead><tr><th>Ημ/νία</th><th>Είδη</th><th>Χρέωση</th><th>Κέρ.</th><th>Σχόλια</th><th></th></tr></thead><tbody id="kar-kin-body"></tbody></table></div></div>
+      <div id="kar-plir" style="display:none"><div class="card"><table><thead><tr><th>Ημ/νία</th><th>Ποσό</th><th>Τρόπος</th><th>Σχόλια</th><th></th></tr></thead><tbody id="kar-plir-body"></tbody></table></div></div>
+      <div id="kar-hist" style="display:none"><div class="card"><table><thead><tr><th>Ημ/νία</th><th>Τύπος</th><th>Περιγραφή</th><th>Ποσό</th><th>Υπόλοιπο</th></tr></thead><tbody id="kar-hist-body"></tbody></table></div></div>
+    </div>
+
+    <!-- ΚΙΝΗΣΕΙΣ -->
+    <div class="page" id="page-kiniseis">
+      <div class="section-top">
+        <div class="section-left">
+          <input type="date" id="kin-from" onchange="renderKiniseis()" style="padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px">
+          <span class="text-dim text-sm">έως</span>
+          <input type="date" id="kin-to" onchange="renderKiniseis()" style="padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px">
+          <input type="text" id="kin-q" placeholder="🔍 Πελάτης..." oninput="renderKiniseis()" style="padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;font-family:'Nunito',sans-serif;width:180px">
+        </div>
+        <button class="btn btn-dark" onclick="openOrder(null)">+ Νέα Κίνηση</button>
+      </div>
+      <div class="card"><div class="card-head"><span class="card-title">Κινήσεις</span><span id="kin-sum" class="text-sm text-dim"></span></div><table><thead><tr><th>Ημ/νία</th><th>Πελάτης</th><th>Είδη</th><th>Χρέωση</th><th>Κέρ.</th><th>Σχόλια</th><th></th></tr></thead><tbody id="kin-tbody"></tbody></table></div>
+    </div>
+
+    <!-- ΠΛΗΡΩΜΕΣ -->
+    <div class="page" id="page-pliromes">
+      <div class="section-top">
+        <div class="section-left">
+          <input type="date" id="plir-from" onchange="renderPliromes()" style="padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px">
+          <span class="text-dim text-sm">έως</span>
+          <input type="date" id="plir-to" onchange="renderPliromes()" style="padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px">
+        </div>
+        <button class="btn btn-dark" onclick="openPlirModal()">+ Νέα Πληρωμή</button>
+      </div>
+      <div class="card"><div class="card-head"><span class="card-title">Πληρωμές</span><span id="plir-sum" class="text-sm text-dim"></span></div><table><thead><tr><th>Ημ/νία</th><th>Πελάτης</th><th>Ποσό</th><th>Τρόπος</th><th>Σχόλια</th><th></th></tr></thead><tbody id="plir-tbody"></tbody></table></div>
+    </div>
+
+    <!-- ΕΞΟΔΑ -->
+    <div class="page" id="page-eksoda">
+      <div class="section-top">
+        <div class="section-left">
+          <input type="date" id="eks-from" onchange="renderEksoda()" style="padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px">
+          <span class="text-dim text-sm">έως</span>
+          <input type="date" id="eks-to" onchange="renderEksoda()" style="padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px">
+          <select id="eks-prom-f" onchange="renderEksoda()" style="padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;font-family:'Nunito',sans-serif;width:180px"><option value="">Όλοι προμηθευτές</option></select>
+        </div>
+        <button class="btn btn-dark" onclick="openEksModal()">+ Νέο Έξοδο</button>
+      </div>
+      <div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">
+        <div class="kpi red"><div class="kpi-label">Σύνολο Εξόδων</div><div class="kpi-val red" id="eks-total">€0.00</div></div>
+        <div class="kpi"><div class="kpi-label">Αριθμός</div><div class="kpi-val" id="eks-count">0</div></div>
+        <div class="kpi red"><div class="kpi-label">Οφειλές Προμηθευτών</div><div class="kpi-val red" id="eks-prom-debt">€0.00</div></div>
+      </div>
+      <div class="card"><table><thead><tr><th>Ημ/νία</th><th>Κατηγορία</th><th>Περιγραφή</th><th>Προμηθευτής</th><th>Ποσό</th><th></th></tr></thead><tbody id="eks-tbody"></tbody></table></div>
+    </div>
+
+    <!-- ΠΡΟΜΗΘΕΥΤΕΣ -->
+    <div class="page" id="page-promitheftes">
+      <div class="section-top">
+        <input type="text" id="prom-q" placeholder="Αναζητηση..." oninput="renderPromitheftes()" style="padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-family:'Nunito',sans-serif;width:220px">
+        <button class="btn btn-dark" onclick="openPromModal()">+ Νέος Προμηθευτής</button>
+      </div>
+      <div class="card"><table><thead><tr><th>Όνομα</th><th>Τηλέφωνο</th><th>Είδη</th><th>Εξοδα</th><th>Οφειλη μας</th><th></th></tr></thead><tbody id="prom-tbody"></tbody></table></div>
+    </div>
+
+    <!-- ΚΑΡΤΕΛΑ ΠΡΟΜΗΘΕΥΤΗ -->
+    <div class="page" id="page-karprom">
+      <div class="section-top">
+        <button class="btn btn-ghost btn-sm" onclick="goPage('promitheftes')">Πισω</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline-green btn-sm" onclick="openPromPlirModal()">Πληρωμη Προμηθευτη</button>
+          <button class="btn btn-dark btn-sm" onclick="openEksForProm()">+ Νέο Έξοδο</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:18px;flex-wrap:wrap">
+        <div><h2 id="karprom-name" style="font-size:20px;font-weight:800"></h2><div id="karprom-sub" class="text-dim text-sm" style="margin-top:4px"></div></div>
+        <div class="yp-box"><div class="lbl">Οφειλη μας</div><div class="amt" id="karprom-yp">0.00</div><div class="sub" id="karprom-yp-sub"></div></div>
+      </div>
+      <div class="tabs">
+        <div class="tab active" onclick="karPromTab('eksoda',this)">Εξοδα / Αγορες</div>
+        <div class="tab" onclick="karPromTab('pliromes',this)">Πληρωμες μας</div>
+        <div class="tab" onclick="karPromTab('hist',this)">Ιστορικο</div>
+      </div>
+      <div id="karprom-eksoda"><div class="card"><table><thead><tr><th>Ημ/νια</th><th>Κατηγορια</th><th>Περιγραφη</th><th>Ποσο</th><th></th></tr></thead><tbody id="karprom-eks-body"></tbody></table></div></div>
+      <div id="karprom-pliromes" style="display:none"><div class="card"><table><thead><tr><th>Ημ/νια</th><th>Ποσο</th><th>Τροπος</th><th>Σχολια</th><th></th></tr></thead><tbody id="karprom-plir-body"></tbody></table></div></div>
+      <div id="karprom-hist" style="display:none"><div class="card"><table><thead><tr><th>Ημ/νια</th><th>Τυπος</th><th>Περιγραφη</th><th>Ποσο</th><th>Υπολοιπο</th></tr></thead><tbody id="karprom-hist-body"></tbody></table></div></div>
+    </div>
+
+    <!-- ΣΤΑΤΙΣΤΙΚΑ -->
+    <div class="page" id="page-statistika">
+      <div class="section-top">
+        <div class="section-left">
+          <input type="date" id="stat-from" onchange="renderStat()" style="padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px">
+          <span class="text-dim text-sm">έως</span>
+          <input type="date" id="stat-to" onchange="renderStat()" style="padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px">
+        </div>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi gold"><div class="kpi-label">Πωλήσεις</div><div class="kpi-val gold" id="st-pol">€0</div></div>
+        <div class="kpi green"><div class="kpi-label">Εισπράχθηκαν</div><div class="kpi-val green" id="st-eisp">€0</div></div>
+        <div class="kpi red"><div class="kpi-label">Συνολικά Υπόλοιπα</div><div class="kpi-val red" id="st-yp">€0</div></div>
+        <div class="kpi"><div class="kpi-label">Κινήσεις</div><div class="kpi-val" id="st-kin">0</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div class="card"><div class="card-head"><span class="card-title">🏆 Top Πελάτες</span></div><div id="st-top-pel" style="padding:4px 0"></div></div>
+        <div class="card"><div class="card-head"><span class="card-title">🍵 Top Είδη</span></div><div id="st-top-eid" style="padding:4px 0"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">📅 Ημερήσια Ανάλυση</span><span id="st-daily-sum" class="text-sm text-dim"></span></div>
+        <table><thead><tr><th>Ημερομηνία</th><th style="text-align:right">Πωλήσεις</th><th style="text-align:right">Εισπράχθηκαν</th><th style="text-align:right">Πίστωση</th><th style="text-align:right">Κεράσματα</th><th style="text-align:right">Κινήσεις</th></tr></thead><tbody id="st-daily-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ΕΙΔΗ -->
+    <div class="page" id="page-eidi">
+      <div class="section-top">
+        <select id="eid-kat-f" onchange="renderEidi()" style="padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-family:'Nunito',sans-serif;width:200px"><option value="">Όλες κατηγορίες</option></select>
+        <button class="btn btn-dark" onclick="openEidosModal()">+ Νέο Είδος</button>
+      </div>
+      <div class="card"><table><thead><tr><th>Κατηγορία</th><th>Όνομα</th><th>Τιμή</th><th>Τιμή Κεράσματος</th><th></th></tr></thead><tbody id="eid-tbody"></tbody></table></div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- MODALS -->
+
+<!-- QUICK ORDER -->
+<div class="overlay" id="m-order">
+<div class="modal modal-lg">
+  <div class="modal-head"><h3 id="ord-title">Νέα Παραγγελία</h3><span class="modal-x" onclick="closeM('m-order')">✕</span></div>
+  <div class="form-row" style="margin-bottom:14px">
+    <div class="fg"><label>Ημερομηνία</label><input type="date" id="ord-date"></div>
+    <div class="fg" id="ord-pel-wrap"><label>Πελάτης</label><select id="ord-pel"><option value="">-- Επιλέξτε --</option></select></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#718096">Είδη Παραγγελίας</div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-sm" onclick="openChreosi()" style="background:#fffbeb;border:1px solid #f6e05e;color:#744210;font-size:12px;padding:4px 12px">+ Χρέωση</button>
+      <button class="btn btn-sm" onclick="saveOrderAsKerasma()" style="background:#fffbeb;border:1px solid #f6e05e;color:#744210;font-size:12px;padding:4px 12px">🎁 Κέρασμα</button>
+    </div>
+  </div>
+  <div class="eidos-grid" id="ord-eidos"></div>
+  <div id="ord-sel-wrap" style="display:none;margin-bottom:4px">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#718096;margin-bottom:6px">Επιλεγμένα</div>
+    <div class="sel-items" id="ord-sel"></div>
+  </div>
+  <div class="order-total"><div class="lbl">Σύνολο Παραγγελίας</div><div class="amt" id="ord-total">€0.00</div></div>
+  <div class="fg"><label>Σχόλια (προαιρετικά)</label><input type="text" id="ord-notes" placeholder="π.χ. χωρίς ζάχαρη..."></div>
+  <div class="form-actions">
+    <button class="btn btn-ghost" onclick="closeM('m-order')">Ακύρωση</button>
+    <button class="btn btn-ghost" onclick="saveOrderAsKerasma()" style="background:#fffbeb;border-color:#f6e05e;color:#744210">🎁 Κέρασμα</button>
+    <button class="btn btn-outline-green" onclick="saveOrderAndPay()">Καταχωρηση + Πληρωμη</button>
+    <button class="btn btn-blue" onclick="saveOrder()">Καταχωρηση</button>
+  </div>
+</div>
+</div>
+
+<!-- ΠΛΗΡΩΜΗ -->
+<div class="overlay" id="m-plir">
+<div class="modal modal-sm">
+  <div class="modal-head"><h3>💳 Καταχώρηση Πληρωμής</h3><span class="modal-x" onclick="closeM('m-plir')">✕</span></div>
+  <div class="fg"><label>Πελάτης</label><select id="plir-pel" onchange="updatePlirYp()"><option value="">-- Επιλέξτε --</option></select></div>
+  <div id="plir-yp-box" style="display:none;background:#fff5f5;border:1px solid #feb2b2;border-radius:8px;padding:10px 14px;margin-bottom:12px">
+    <div style="font-size:11px;color:#c53030;font-weight:700">ΤΡΕΧΟΝ ΥΠΟΛΟΙΠΟ</div>
+    <div id="plir-yp-val" style="font-size:22px;font-weight:800;color:#c53030">€0.00</div>
+  </div>
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#718096;margin-bottom:6px">Γρήγορα ποσά</div>
+  <div class="ppills" id="plir-pills"></div>
+  <div class="fg"><label>Ποσό (€)</label><input type="number" id="plir-amt" step="0.50" min="0" placeholder="0.00" oninput="updatePlirDiff()"></div>
+  <div id="plir-diff-box" style="display:none;background:#fffbeb;border:1px solid #f6e05e;border-radius:8px;padding:10px 14px;margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-size:11px;color:#744210;font-weight:700">ΔΙΑΦΟΡΑ</div><div id="plir-diff-val" style="font-size:18px;font-weight:800;color:#744210">€0.00</div></div>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#744210;font-weight:600">
+        <input type="checkbox" id="plir-ker-cb" style="width:16px;height:16px;cursor:pointer">
+        Κέρασμα η διαφορά
+      </label>
+    </div>
+  </div>
+  <div class="fg"><label>Τρόπος Πληρωμής</label><select id="plir-tropos"><option value="cash">💵 Μετρητά</option><option value="card">💳 Κάρτα</option></select></div>
+  <div class="fg"><label>Ημερομηνία</label><input type="date" id="plir-date"></div>
+  <div class="fg"><label>Σχόλια</label><input type="text" id="plir-notes" placeholder="Προαιρετικά..."></div>
+  <div class="form-actions">
+    <button class="btn btn-ghost" onclick="closeM('m-plir')">Ακύρωση</button>
+    <button class="btn btn-green" onclick="savePlir()">✓ Αποθήκευση</button>
+  </div>
+</div>
+</div>
+
+<!-- ΠΕΛΑΤΗΣ -->
+<div class="overlay" id="m-pel">
+<div class="modal modal-sm">
+  <div class="modal-head"><h3 id="mp-title">Νέος Πελάτης</h3><span class="modal-x" onclick="closeM('m-pel')">✕</span></div>
+  <input type="hidden" id="mp-id">
+  <div class="fg"><label>Ονοματεπώνυμο *</label><input type="text" id="mp-name" placeholder="ΠΑΠΑΔΟΠΟΥΛΟΣ ΓΙΩΡΓΟΣ"></div>
+  <div class="form-row">
+    <div class="fg"><label>Τηλέφωνο</label><input type="text" id="mp-phone"></div>
+    <div class="fg"><label>Περιοχή/Παρατσούκλι</label><input type="text" id="mp-area" placeholder="π.χ. ΜΟΥΡΜΟΥΡΑΣ"></div>
+  </div>
+  <div class="fg"><label>Σημειώσεις</label><textarea id="mp-notes"></textarea></div>
+  <div class="form-actions">
+    <button class="btn btn-ghost" onclick="closeM('m-pel')">Ακύρωση</button>
+    <button class="btn btn-dark" onclick="savePel()">Αποθήκευση</button>
+  </div>
+</div>
+</div>
+
+<!-- ΕΞΟΔΟ -->
+<div class="overlay" id="m-eks">
+<div class="modal modal-sm">
+  <div class="modal-head"><h3>Νέο Έξοδο</h3><span class="modal-x" onclick="closeM('m-eks')">✕</span></div>
+  <input type="hidden" id="ek-id">
+  <div class="form-row">
+    <div class="fg"><label>Ημερομηνία</label><input type="date" id="ek-date"></div>
+    <div class="fg"><label>Κατηγορία</label><input type="text" id="ek-kat" list="ek-kat-dl"><datalist id="ek-kat-dl"><option>ΕΝΟΙΚΙΟ</option><option>ΔΕΗ</option><option>ΝΕΡΟ</option><option>ΤΗΛΕΦΩΝΟ</option><option>ΜΙΣΘΟΔΟΣΙΑ</option><option>ΑΝΑΛΩΣΙΜΑ</option><option>ΠΡΟΜΗΘΕΥΤΕΣ</option><option>ΕΠΙΣΚΕΥΕΣ</option><option>ΔΙΑΦΟΡΑ</option></datalist></div>
+  </div>
+  <div class="fg"><label>Περιγραφή *</label><input type="text" id="ek-desc" placeholder="Σύντομη περιγραφή"></div>
+  <div class="fg"><label>Προμηθευτής</label><select id="ek-prom-id"><option value="">-- Χωρίς προμηθευτή --</option></select></div>
+  <div class="fg"><label>Ποσό (€) *</label><input type="number" id="ek-amt" step="0.01" min="0" value="0"></div>
+  <div class="form-actions">
+    <button class="btn btn-ghost" onclick="closeM('m-eks')">Ακύρωση</button>
+    <button class="btn btn-dark" onclick="saveEks()">Αποθήκευση</button>
+  </div>
+</div>
+</div>
+
+<!-- ΠΡΟΜΗΘΕΥΤΗΣ -->
+<div class="overlay" id="m-prom">
+<div class="modal modal-sm">
+  <div class="modal-head"><h3 id="mpr-title">Νέος Προμηθευτής</h3><span class="modal-x" onclick="closeM('m-prom')">✕</span></div>
+  <input type="hidden" id="mpr-id">
+  <div class="fg"><label>Όνομα *</label><input type="text" id="mpr-name" placeholder="AEGEAN FOOD"></div>
+  <div class="fg"><label>Τηλέφωνο</label><input type="text" id="mpr-phone"></div>
+  <div class="fg"><label>Είδη που πουλάει</label><input type="text" id="mpr-eidi" placeholder="π.χ. Καφές, αναλώσιμα"></div>
+  <div class="fg"><label>Σημειώσεις</label><textarea id="mpr-notes"></textarea></div>
+  <div class="form-actions">
+    <button class="btn btn-ghost" onclick="closeM('m-prom')">Ακύρωση</button>
+    <button class="btn btn-dark" onclick="saveProm()">Αποθήκευση</button>
+  </div>
+</div>
+</div>
+
+<!-- ΕΙΔΟΣ -->
+<div class="overlay" id="m-eidos">
+<div class="modal modal-sm">
+  <div class="modal-head"><h3 id="me-title">Νέο Είδος</h3><span class="modal-x" onclick="closeM('m-eidos')">✕</span></div>
+  <input type="hidden" id="me-id">
+  <div class="form-row">
+    <div class="fg"><label>Κατηγορία *</label><input type="text" id="me-kat" list="me-kat-dl"><datalist id="me-kat-dl"></datalist></div>
+    <div class="fg"><label>Όνομα *</label><input type="text" id="me-name"></div>
+  </div>
+  <div class="form-row">
+    <div class="fg"><label>Τιμή (€)</label><input type="number" id="me-price" step="0.10" min="0" value="0"></div>
+    <div class="fg"><label>Τιμή Κεράσματος (€)</label><input type="number" id="me-price-ker" step="0.10" min="0" value="0"></div>
+  </div>
+  <div class="form-actions">
+    <button class="btn btn-ghost" onclick="closeM('m-eidos')">Ακύρωση</button>
+    <button class="btn btn-dark" onclick="saveEidos()">Αποθήκευση</button>
+  </div>
+</div>
+</div>
+
+<!-- ΧΕΙΡΟΚΙΝΗΤΗ ΧΡΕΩΣΗ -->
+<div class="overlay" id="m-chreosi">
+<div class="modal modal-sm">
+  <div class="modal-head"><h3>+ Χειροκίνητη Χρέωση</h3><span class="modal-x" onclick="closeM('m-chreosi')">x</span></div>
+  <div class="fg"><label>Πελάτης</label><select id="chr-pel"><option value="">-- Επιλέξτε --</option></select></div>
+  <div class="fg"><label>Περιγραφή</label><input type="text" id="chr-desc" placeholder="π.χ. Δανεικά, Άλλο..."></div>
+  <div class="fg"><label>Ποσό (€)</label><input type="number" id="chr-amt" step="0.50" min="0" placeholder="0.00"></div>
+  <div class="fg"><label>Ημερομηνία</label><input type="date" id="chr-date"></div>
+  <div class="form-actions">
+    <button class="btn btn-ghost" onclick="closeM('m-chreosi')">Ακύρωση</button>
+    <button class="btn btn-dark" onclick="saveChreosi()">Καταχώρηση</button>
+  </div>
+</div>
+</div>
+
+<!-- ΜΕΤΑΦΟΡΑ ΚΙΝΗΣΗΣ -->
+<div class="overlay" id="m-metakin">
+<div class="modal modal-sm">
+  <div class="modal-head"><h3>Μεταφορά σε άλλον πελάτη</h3><span class="modal-x" onclick="closeM('m-metakin')">x</span></div>
+  <div id="metakin-info" style="background:#f7fafc;border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:13px;color:#2d3748"></div>
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#718096;margin-bottom:6px">Επιλέξτε τι να μεταφερθεί:</div>
+  <div id="metakin-items" style="display:flex;flex-direction:column;gap:5px;margin-bottom:14px;max-height:220px;overflow-y:auto"></div>
+  <div class="fg"><label>Μεταφορά σε:</label><select id="metakin-pel"><option value="">-- Επιλέξτε πελάτη --</option></select></div>
+  <div class="form-actions">
+    <button class="btn btn-ghost" onclick="closeM('m-metakin')">Ακύρωση</button>
+    <button class="btn btn-blue" onclick="saveMetakin()">Μεταφορά</button>
+  </div>
+</div>
+</div>
+
+<!-- ΠΛΗΡΩΜΗ ΠΡΟΜΗΘΕΥΤΗ -->
+<div class="overlay" id="m-prom-plir">
+<div class="modal modal-sm">
+  <div class="modal-head"><h3>Πληρωμη Προμηθευτη</h3><span class="modal-x" onclick="closeM('m-prom-plir')">x</span></div>
+  <input type="hidden" id="pp-prom-id">
+  <div id="pp-prom-name" style="font-size:15px;font-weight:800;margin-bottom:12px;color:#1a202c"></div>
+  <div style="background:#fff5f5;border:1px solid #feb2b2;border-radius:8px;padding:10px 14px;margin-bottom:12px">
+    <div style="font-size:11px;color:#c53030;font-weight:700">ΟΦΕΙΛΗ ΜΑΣ</div>
+    <div id="pp-yp-val" style="font-size:22px;font-weight:800;color:#c53030">0.00</div>
+  </div>
+  <div class="fg"><label>Ποσο Πληρωμης (EUR)</label><input type="number" id="pp-amt" step="0.01" min="0" placeholder="0.00"></div>
+  <div class="fg"><label>Τροπος</label><select id="pp-tropos"><option value="cash">Μετρητα</option><option value="card">Καρτα</option><option value="transfer">Τραπεζικο</option></select></div>
+  <div class="fg"><label>Ημερομηνια</label><input type="date" id="pp-date"></div>
+  <div class="fg"><label>Σχολια</label><input type="text" id="pp-notes" placeholder="Προαιρετικα..."></div>
+  <div class="form-actions">
+    <button class="btn btn-ghost" onclick="closeM('m-prom-plir')">Ακυρωση</button>
+    <button class="btn btn-green" onclick="savePromPlir()">Αποθηκευση</button>
+  </div>
+</div>
+</div>
+
+<!-- ΜΕΤΑΦΟΡΑ ΥΠΟΛΟΙΠΟΥ -->
+<div class="overlay" id="m-metafora">
+<div class="modal modal-sm">
+  <div class="modal-head"><h3>Μεταφορα Υπολοιπου</h3><span class="modal-x" onclick="closeM('m-metafora')">x</span></div>
+  <div style="background:#fffbeb;border:1px solid #f6e05e;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#744210">
+    Χρησιμοποιησε αυτη τη λειτουργια για να μεταφερεις υπολοιπο απο το παλιο προγραμμα. Η κινηση καταχωρειται με την ημερομηνια που οριζεις και δεν μετραει στις κινησεις ημερας.
+  </div>
+  <div class="fg"><label>Πελατης</label><select id="met-pel"><option value="">-- Επιλεξτε --</option></select></div>
+  <div class="fg"><label>Υπολοιπο που οφειλει (EUR)</label><input type="number" id="met-amt" step="0.01" min="0" placeholder="0.00"></div>
+  <div class="fg"><label>Ημερομηνια μεταφορας</label><input type="date" id="met-date"></div>
+  <div class="fg"><label>Σχολια</label><input type="text" id="met-notes" value="Μεταφορα απο παλιο προγραμμα"></div>
+  <div class="form-actions">
+    <button class="btn btn-ghost" onclick="closeM('m-metafora')">Ακυρωση</button>
+    <button class="btn btn-dark" onclick="saveMetafora()">Καταχωρηση</button>
+  </div>
+</div>
+</div>
+
+<!-- ΣΑΝΤΟΥΙΤΣ MODAL -->
+<div class="overlay" id="m-sandwich">
+<div class="modal modal-lg">
+  <div class="modal-head"><h3>🥪 Φτιάξε το Δικό σου Σάντουιτς</h3><span class="modal-x" onclick="closeSandwich()">✕</span></div>
+  <div style="font-size:12px;color:#718096;margin-bottom:12px">Επίλεξε υλικά — η τιμή υπολογίζεται αυτόματα</div>
+  <div class="eidos-grid" id="sw-eidos" style="max-height:320px"></div>
+  <div id="sw-sel-wrap" style="display:none;margin:12px 0">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#718096;margin-bottom:6px">Επιλεγμένα Υλικά</div>
+    <div class="sel-items" id="sw-sel"></div>
+  </div>
+  <div class="order-total"><div class="lbl">Σύνολο Σάντουιτς</div><div class="amt" id="sw-total">€0.00</div></div>
+  <div class="form-actions">
+    <button class="btn btn-ghost" onclick="closeSandwich()">Ακύρωση</button>
+    <button class="btn btn-blue" onclick="saveSandwich()">✓ Προσθήκη στην Παραγγελία</button>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// DATA
+var DB = {pelates:[],eidi:[],kiniseis:[],pliromes:[],eksoda:[],promitheftes:[],promPliromes:[]};
+
+function saveDB(){
+  try{localStorage.setItem('cg4',JSON.stringify(DB));}catch(e){}
+  autoSaveDrive();
+}
+function loadDB(){
+  try{
+    var s=localStorage.getItem('cg4');
+    if(s){DB=JSON.parse(s);if(!DB.promPliromes)DB.promPliromes=[];return;}
+    var s3=localStorage.getItem('cg3');
+    if(s3){DB=JSON.parse(s3);DB.promPliromes=[];saveDB();return;}
+  }catch(e){}
+}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+
+// HELPERS
+// Η ημέρα αλλάζει στις 6:00 πμ (όχι μεσάνυχτα)
+// Αν είναι 00:00-05:59 θεωρείται ακόμα η προηγούμενη μέρα
+function today(){
+  var now=new Date();
+  if(now.getHours()<6){
+    // Πριν τις 6 πμ = ακόμα η προηγούμενη μέρα
+    now.setDate(now.getDate()-1);
+  }
+  return now.toISOString().slice(0,10);
+}
+function fmt(d){if(!d)return'';var p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+function eur(n){return '€'+(+n||0).toFixed(2);}
+function pelN(id){var p=DB.pelates.find(function(x){return x.id===id;});return p?p.name:'-';}
+function eidN(id){var e=DB.eidi.find(function(x){return x.id===id;});return e?e.name:'-';}
+function getKats(){return [...new Set(DB.eidi.map(function(e){return e.kat;}))].sort();}
+function promN(id){var p=DB.promitheftes.find(function(x){return x.id===id;});return p?p.name:'-';}
+
+function pelYp(pelId){
+  var charged=DB.kiniseis.filter(function(k){return k.pelatisId===pelId;}).reduce(function(s,k){return s+kinCharged(k);},0);
+  var paid=DB.pliromes.filter(function(p){return p.pelatisId===pelId;}).reduce(function(s,p){return s+p.amount;},0);
+  return Math.round((charged-paid)*100)/100;
+}
+function kinCharged(k){return k.items.filter(function(i){return !i.kerasma;}).reduce(function(s,i){return s+i.price;},0);}
+function kinKer(k){return k.items.filter(function(i){return i.kerasma;}).reduce(function(s,i){return s+i.price;},0);}
+function kinDesc(k){
+  // Ομαδοποίηση ειδών ανά ώρα
+  var byTime={};
+  k.items.forEach(function(i){
+    var t=i.time||k.time||'';
+    if(!byTime[t])byTime[t]=[];
+    byTime[t].push(i);
+  });
+  return Object.entries(byTime).map(function(entry){
+    var t=entry[0]; var items=entry[1];
+    var names=items.map(function(i){
+      var base=i.customName?i.customName:eidN(i.eidosId)+(i.kerasma?' (κέρ.)':'');
+      if(i.isSandwich&&i.sandwichDesc)base='Σαντουιτς ('+i.sandwichDesc+')';
+      return base;
+    }).join(', ');
+    return (t?'<span style="color:#718096;font-size:10px">['+t+']</span> ':'')+names;
+  }).join(' · ')||'-';
+}
+
+function toast(msg,dur){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.style.display='block';
+  clearTimeout(t._t);t._t=setTimeout(function(){t.style.display='none';},dur||2500);
+}
+
+// NAV
+var TITLES={tameio:'Ταμείο Ημέρας',klisimo:'Κλείσιμο Ημέρας',pelates:'Πελάτες',kartela:'Καρτέλα Πελάτη',kiniseis:'Κινήσεις',pliromes:'Πληρωμές',eksoda:'Έξοδα',promitheftes:'Προμηθευτές',karprom:'Καρτέλα Προμηθευτή',statistika:'Στατιστικά',eidi:'Είδη'};
+
+function goPage(p){
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
+  document.querySelectorAll('.nav-btn').forEach(function(x){x.classList.remove('active');});
+  var pg=document.getElementById('page-'+p);
+  if(pg)pg.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(function(x){if(x.getAttribute('onclick')==="goPage('"+p+"')")x.classList.add('active');});
+  document.getElementById('page-title').textContent=TITLES[p]||p;
+  if(p==='tameio'){initTameio();}
+  if(p==='klisimo'){initKlisimo();}
+  if(p==='pelates'){renderPelates();}
+  if(p==='kiniseis'){initKin();}
+  if(p==='pliromes'){initPlir();}
+  if(p==='eksoda'){initEks();}
+  if(p==='promitheftes'){renderPromitheftes();}
+  if(p==='karprom'&&curPromId){renderKarProm(curPromId);}
+  if(p==='statistika'){initStat();}
+  if(p==='eidi'){renderEidi();}
+  if(p==='kartela'){document.querySelectorAll('.nav-btn').forEach(function(x){if(x.getAttribute('onclick')==="goPage('pelates')")x.classList.add('active');});}
+  if(p==='karprom'){document.querySelectorAll('.nav-btn').forEach(function(x){if(x.getAttribute('onclick')==="goPage('promitheftes')")x.classList.add('active');});}
+}
+
+// MODALS
+function openM(id){document.getElementById(id).classList.add('open');}
+function closeM(id){
+  document.getElementById(id).classList.remove('open');
+  var ap=document.querySelector('.page.active');
+  if(ap){
+    var pid=ap.id.replace('page-','');
+    if(pid==='tameio')renderTameio();
+    if(pid==='klisimo')renderKlisimo();
+    if(pid==='pelates')renderPelates();
+    if(pid==='kiniseis')renderKiniseis();
+    if(pid==='pliromes')renderPliromes();
+    if(pid==='eksoda')renderEksoda();
+    if(pid==='promitheftes')renderPromitheftes();
+    if(pid==='kartela'&&curPelId)renderKartela(curPelId);
+  }
+}
+document.querySelectorAll('.overlay').forEach(function(o){o.addEventListener('click',function(e){if(e.target===o)o.classList.remove('open');});});
+
+// ΤΑΜΕΙΟ
+function initTameio(){
+  var inp=document.getElementById('tam-date');
+  if(!inp.value)inp.value=today();
+  setTamFilter('open');
+}
+
+function renderTameio(){
+  var d=document.getElementById('tam-date').value||today();
+  var allDayKin=DB.kiniseis.filter(function(k){return k.date===d&&!k.isMetafora;});
+  var dayPlir=DB.pliromes.filter(function(p){return p.date===d;});
+  var pol=allDayKin.reduce(function(s,k){return s+kinCharged(k);},0);
+  var ker=allDayKin.reduce(function(s,k){return s+kinKer(k);},0);
+  var eisp=dayPlir.reduce(function(s,p){return s+p.amount;},0);
+  // pist per customer
+  var pelIdsAll=[...new Set(allDayKin.map(function(k){return k.pelatisId;}))];
+  var pist=pelIdsAll.reduce(function(s,pid){
+    var pCh=allDayKin.filter(function(k){return k.pelatisId===pid;}).reduce(function(a,k){return a+kinCharged(k);},0);
+    var pPd=dayPlir.filter(function(p){return p.pelatisId===pid;}).reduce(function(a,p){return a+p.amount;},0);
+    var diff=pCh-pPd; return s+(diff>0?diff:0);
+  },0);
+  document.getElementById('tk-pol').textContent=eur(pol);
+  document.getElementById('tk-eisp').textContent=eur(eisp);
+  document.getElementById('tk-pist').textContent=eur(pist);
+  document.getElementById('tk-ker').textContent=eur(ker);
+  // Sort: ΑΓΡΑ first, then alphabetical
+  var pelIds=[...new Set(allDayKin.map(function(k){return k.pelatisId;}))].sort(function(a,b){
+    var pa=DB.pelates.find(function(x){return x.id===a;})||{};
+    var pb=DB.pelates.find(function(x){return x.id===b;})||{};
+    var aA=pa.area||''; var bA=pb.area||'';
+    if(aA==='ΑΓΡΑ'&&bA!=='ΑΓΡΑ')return -1;
+    if(bA==='ΑΓΡΑ'&&aA!=='ΑΓΡΑ')return 1;
+    return pelN(a).localeCompare(pelN(b),'el');
+  });
+  document.getElementById('tam-info').textContent=pelIds.length+' pelates '+allDayKin.length+' kiniseis';
+  var listEl=document.getElementById('tam-list');
+  var empty=document.getElementById('tam-empty');
+  var rows=document.getElementById('tam-rows');
+  if(!pelIds.length){listEl.style.display='none';empty.style.display='block';return;}
+  empty.style.display='none';listEl.style.display='flex';
+  var q1="'";
+  var html='';
+  pelIds.forEach(function(pid){
+    var pKin=allDayKin.filter(function(k){return k.pelatisId===pid;});
+    var charged=pKin.reduce(function(s,k){return s+kinCharged(k);},0);
+    var totalYp=pelYp(pid);
+    var todayPaid=DB.pliromes.filter(function(p){
+      return p.pelatisId===pid&&p.date===d;
+    }).reduce(function(s,p){return s+p.amount;},0);
+    var todayYp=Math.max(0,charged-todayPaid);
+    var isOpen=todayYp>0.005;
+    if(tamFilter==='open'&&!isOpen)return;
+    var p=DB.pelates.find(function(x){return x.id===pid;});
+    var desc=pKin.map(function(k){return kinDesc(k);}).join(' | ');
+    var rowCls=isOpen?'pistosi':'exofli';
+    var amtCls=isOpen?'text-red':'text-green';
+    var stBadge=isOpen
+      ?'<span style="background:#fff5f5;color:#c53030;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700">ΑΝΟΙΧΤΟ</span>'
+      :'<span style="background:#f0fff4;color:#276749;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700">OK</span>';
+    var btnOrd='<button class="btn btn-blue btn-xs" onclick="openOrder('+q1+pid+q1+')" title="Νέα Παραγγελία" style="padding:3px 8px">+Παρ</button>';
+    var btnPay=isOpen?'<button class="btn btn-outline-green btn-xs" onclick="openPlirFor('+q1+pid+q1+')" title="Πληρωμή" style="padding:3px 8px">Πλ/μη</button>':'';
+    var btnMeta='';
+    if(isOpen){
+      if(pKin.length===1){
+        btnMeta='<button class="btn btn-ghost btn-xs" onclick="openMetakin('+q1+pKin[0].id+q1+')" title="Μεταφορά" style="padding:3px 6px">Μετ.</button>';
+      } else {
+        btnMeta='<button class="btn btn-ghost btn-xs" onclick="openMetakinSelect('+q1+pid+q1+')" title="Μεταφορά κίνησης" style="padding:3px 6px">Μετ.</button>';
+      }
+    }
+    var btnKar='<button class="btn btn-ghost btn-xs" onclick="openKar('+q1+pid+q1+')" title="Καρτέλα" style="padding:3px 6px">Καρτ.</button>';
+    var yp_disp=totalYp>0.005?eur(totalYp):'OK';
+    var todayYp_disp=todayYp>0.005?('<span style="color:#c53030;font-weight:700">'+eur(todayYp)+'</span>'):'<span style="color:#276749;font-weight:700">OK</span>';
+    var row='<div class="tam-row '+rowCls+'">';
+    row+='<div><div class="tam-pel">'+(p?p.name:'--')+'</div>';
+    row+='<div class="tam-area">'+(p&&p.area?p.area:'')+'</div></div>';
+    row+='<div class="tam-desc">'+desc+'</div>';
+    row+='<div class="tam-amt '+amtCls+'" style="text-align:right">'+eur(charged)+'</div>';
+    row+='<div style="text-align:right">'+todayYp_disp+'</div>';
+    row+='<div class="tam-yp '+(totalYp>0.005?'text-red':'text-green')+'" style="text-align:right">'+yp_disp+'</div>';
+    row+='<div class="tam-st">'+stBadge+'</div>';
+    row+='<div class="tam-act">'+btnOrd+btnPay+btnMeta+btnKar+'</div>';
+    row+='</div>';
+    html+=row;
+  });
+  if(!html)html='<div style="padding:20px;text-align:center;color:#a0aec0">Δεν υπάρχουν ανοιχτές κινήσεις</div>';
+  rows.innerHTML=html;
+}
+
+// ΚΛΕΙΣΙΜΟ
+function initKlisimo(){
+  var inp=document.getElementById('kl-date');
+  if(!inp.value)inp.value=today();
+  renderKlisimo();
+}
+
+function renderKlisimo(){
+  var d=document.getElementById('kl-date').value||today();
+  var dayKin=DB.kiniseis.filter(function(k){return k.date===d;});
+  var dayPlir=DB.pliromes.filter(function(p){return p.date===d;});
+  var total=dayKin.reduce(function(s,k){return s+kinCharged(k);},0);
+  var eisp=dayPlir.reduce(function(s,p){return s+p.amount;},0);
+  var open=Math.max(0,total-eisp);
+  document.getElementById('kl-total').textContent=eur(total);
+  document.getElementById('kl-eisp').textContent=eur(eisp);
+  document.getElementById('kl-open').textContent=eur(open);
+  document.getElementById('kl-plir-sum').textContent='Σύνολο: '+eur(eisp);
+  document.getElementById('kl-plir-body').innerHTML=dayPlir.length?dayPlir.map(function(p){return '<tr><td>'+pelN(p.pelatisId)+'</td><td class="text-green">'+eur(p.amount)+'</td><td><span class="badge bg-gray">'+(p.tropos==='cash'?'Μετρητά':'Κάρτα')+'</span></td></tr>';}).join(''):'<tr><td colspan="3"><div class="empty" style="padding:16px"><p>Καμία πληρωμή</p></div></td></tr>';
+  var pelIds=[...new Set(dayKin.map(function(k){return k.pelatisId;}))];
+  var openPels=pelIds.filter(function(id){return pelYp(id)>0.005;}).sort(function(a,b){return pelN(a).localeCompare(pelN(b),'el');});
+  document.getElementById('kl-open-body').innerHTML=openPels.length?openPels.map(function(id){var dc=dayKin.filter(function(k){return k.pelatisId===id;}).reduce(function(s,k){return s+kinCharged(k);},0);return '<tr><td><strong>'+pelN(id)+'</strong></td><td class="text-red">'+eur(dc)+'</td><td class="text-red">'+eur(pelYp(id))+'</td></tr>';}).join(''):'<tr><td colspan="3" style="text-align:center;padding:16px;color:#48bb78">✓ Όλοι εξοφλημένοι!</td></tr>';
+  document.getElementById('kl-kin-body').innerHTML=dayKin.length?[...dayKin].sort(function(a,b){return pelN(a.pelatisId).localeCompare(pelN(b.pelatisId),'el');}).map(function(k){var tot=kinCharged(k);var ker=kinKer(k);var pf=dayPlir.filter(function(p){return p.pelatisId===k.pelatisId;}).reduce(function(s,p){return s+p.amount;},0);var yp=pelYp(k.pelatisId);return '<tr><td><strong>'+pelN(k.pelatisId)+'</strong></td><td style="font-size:12px;max-width:200px">'+kinDesc(k)+'</td><td class="text-gold">'+eur(tot)+'</td><td class="text-dim">'+(ker>0?eur(ker):'-')+'</td><td class="text-green">'+eur(pf)+'</td><td class="'+(yp>0?'text-red':'text-green')+'">'+eur(yp)+'</td></tr>';}).join(''):'<tr><td colspan="6"><div class="empty" style="padding:16px"><p>Δεν υπάρχουν κινήσεις</p></div></td></tr>';
+}
+
+// QUICK ORDER
+var ordItems=[];
+function openOrder(pelId){
+  ordItems=[];
+  document.getElementById('ord-date').value=document.getElementById('tam-date')&&document.getElementById('tam-date').value?document.getElementById('tam-date').value:today();
+  document.getElementById('ord-notes').value='';
+  var pw=document.getElementById('ord-pel-wrap');
+  var ps=document.getElementById('ord-pel');
+  if(pelId){
+    pw.style.display='none';
+    ps.innerHTML='<option value="'+pelId+'">'+pelN(pelId)+'</option>';
+    ps.value=pelId;ps._fixed=true;
+    document.getElementById('ord-title').textContent='Παραγγελία - '+pelN(pelId);
+  } else {
+    pw.style.display='block';
+    ps.innerHTML='<option value="">-- Επιλέξτε πελάτη --</option>'+
+      [...DB.pelates].sort(pelSort).map(function(p){return '<option value="'+p.id+'">'+p.name+(p.area?' ('+p.area+')':'')+'</option>';}).join('');
+    ps.value='';ps._fixed=false;
+    document.getElementById('ord-title').textContent='Νέα Παραγγελία';
+  }
+  buildEidosGrid();renderOrdSel();
+  openM('m-order');
+}
+
+function buildEidosGrid(){
+  var g=document.getElementById('ord-eidos');
+  var kats=getKats();
+  // Count sales per eidos
+  var salesCount={};
+  DB.kiniseis.forEach(function(k){k.items.forEach(function(i){if(!i.kerasma)salesCount[i.eidosId]=(salesCount[i.eidosId]||0)+1;});});
+  g.innerHTML=kats.map(function(kat){
+    // Αν είναι ΥΛΙΚΑ ΣΑΝΤΟΥΙΤΣ, κρύψε τα είδη από το κανονικό grid
+    if(kat==='ΥΛΙΚΑ ΣΑΝΤΟΥΙΤΣ') return '';
+    var katEidi=DB.eidi.filter(function(e){return e.kat===kat;}).sort(function(a,b){return (salesCount[b.id]||0)-(salesCount[a.id]||0);});
+    return '<div class="ekat">'+kat+'</div>'+
+      katEidi.map(function(e){
+        // Αν είναι το ΦΤΙΑΞΕ ΤΟ ΔΙΚΟ ΣΟΥ ΣΑΝΤΟΥΙΤΣ, κάνε ειδικό κουμπί
+        var isSandwich = e.name.indexOf('ΣΑΝΤΟΥΙΤΣ')>-1 && e.price===0;
+        if(isSandwich){
+          return '<div class="eidos-btn" id="eb-'+e.id+'" onclick="openSandwich(\''+e.id+'\')" style="border-color:#ed8936;background:#fffaf0;grid-column:1/-1">'+
+            '<span>🥪 '+e.name+'</span>'+
+            '<span class="ep">Επιλογή υλικών →</span>'+
+            '</div>';
+        }
+        return '<div class="eidos-btn" id="eb-'+e.id+'" onclick="addEidos(\''+e.id+'\',false)">'+
+          '<span>'+e.name+'</span>'+
+          '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">'+
+          '<span class="ep">'+eur(e.price)+'</span>'+
+          (e.priceKer>0?'<span style="font-size:10px;color:#a0aec0;cursor:pointer" onclick="event.stopPropagation();addEidos(\''+e.id+'\',true)">🎁 κέρ.</span>':'')+
+          '</div></div>';
+      }).join('');
+  }).join('');
+}
+
+function addEidos(eidosId,kerasma){
+  var e=DB.eidi.find(function(x){return x.id===eidosId;});
+  if(!e)return;
+  ordItems.push({eidosId:eidosId,price:kerasma?e.priceKer:e.price,kerasma:kerasma});
+  renderOrdSel();
+}
+
+function removeOrdItem(idx){ordItems.splice(idx,1);renderOrdSel();}
+
+function renderOrdSel(){
+  var wrap=document.getElementById('ord-sel-wrap');
+  var cont=document.getElementById('ord-sel');
+  var total=ordItems.filter(function(i){return !i.kerasma;}).reduce(function(s,i){return s+i.price;},0);
+  document.getElementById('ord-total').textContent=eur(total);
+  document.querySelectorAll('.eidos-btn').forEach(function(b){b.classList.remove('sel');});
+  ordItems.forEach(function(it){var b=document.getElementById('eb-'+it.eidosId);if(b)b.classList.add('sel');});
+  if(!ordItems.length){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  var groups={};
+  ordItems.forEach(function(it,idx){
+    var k=it.eidosId+'|'+it.kerasma;
+    if(!groups[k])groups[k]={eidosId:it.eidosId,kerasma:it.kerasma,price:it.price,indices:[]};
+    groups[k].indices.push(idx);
+  });
+  cont.innerHTML=Object.values(groups).map(function(g){
+    return '<div class="sel-item">'+
+      '<span class="sel-item-name">'+(g.indices.length>1?g.indices.length+'× ':'')+eidN(g.eidosId)+(g.kerasma?' 🎁':'')+'</span>'+
+      '<span class="sel-item-amt">'+eur(g.price*g.indices.length)+'</span>'+
+      '<div class="sel-item-ctrl">'+
+        '<button class="ctrl-btn" onclick="addEidos(\''+g.eidosId+'\','+g.kerasma+')">+</button>'+
+        '<button class="ctrl-btn" onclick="removeOrdItem('+g.indices[g.indices.length-1]+')">−</button>'+
+      '</div></div>';
+  }).join('');
+}
+
+function saveOrderAsKerasma(){
+  var ps=document.getElementById('ord-pel');
+  var pelId=ps.value;
+  if(!pelId){toast('Επιλέξτε πελάτη');return;}
+  if(!ordItems.length){toast('Επιλέξτε τουλάχιστον ένα είδος');return;}
+  var date=document.getElementById('ord-date').value||today();
+  var notes=document.getElementById('ord-notes').value.trim();
+  // Mark all items as kerasma
+  var kerasmaItems=ordItems.map(function(i){
+    return {eidosId:i.eidosId,price:i.priceKer||0,kerasma:true,isSandwich:i.isSandwich,sandwichDesc:i.sandwichDesc,sandwichItems:i.sandwichItems,customName:i.customName};
+  });
+  var existing=DB.kiniseis.find(function(k){return k.pelatisId===pelId&&k.date===date&&!k.isMetafora;});
+  if(existing){existing.items=existing.items.concat(kerasmaItems);if(notes)existing.notes=(existing.notes?existing.notes+' - ':'')+notes;}
+  else{DB.kiniseis.push({id:uid(),date:date,pelatisId:pelId,items:kerasmaItems,notes:notes});}
+  saveDB();closeM('m-order');
+  toast('✅ '+pelN(pelId)+': '+eur(charged)+' → πίστωση');
+  toast('🎁 Κέρασμα στον '+pelN(pelId));
+}
+
+function saveOrder(){
+  var ps=document.getElementById('ord-pel');
+  var pelId=ps.value;
+  if(!pelId){toast('⚠️ Επιλέξτε πελάτη');return;}
+  if(!ordItems.length){toast('⚠️ Επιλέξτε τουλάχιστον ένα είδος');return;}
+  var date=document.getElementById('ord-date').value||today();
+  var notes=document.getElementById('ord-notes').value.trim();
+  var now=new Date();
+  var timeStr=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  // Προσθέτω ώρα σε κάθε item
+  var timedItems=ordItems.map(function(i){return Object.assign({},i,{time:timeStr});});
+  var charged=timedItems.filter(function(i){return !i.kerasma;}).reduce(function(s,i){return s+i.price;},0);
+  var existing=DB.kiniseis.find(function(k){return k.pelatisId===pelId&&k.date===date;});
+  if(existing){
+    existing.items=existing.items.concat(timedItems);
+    if(notes)existing.notes=(existing.notes?existing.notes+' . ':'')+notes;
+    existing.lastTime=timeStr;
+  } else {
+    DB.kiniseis.push({id:uid(),date:date,time:timeStr,lastTime:timeStr,pelatisId:pelId,items:timedItems,notes:notes});
+  }
+  saveDB();closeM('m-order');
+  toast('✅ '+pelN(pelId)+': '+eur(charged)+' → πίστωση');
+}
+
+function editKin(id){
+  var k=DB.kiniseis.find(function(x){return x.id===id;});if(!k)return;
+  ordItems=k.items.slice();
+  var ps=document.getElementById('ord-pel');
+  document.getElementById('ord-pel-wrap').style.display='none';
+  ps.innerHTML='<option value="'+k.pelatisId+'">'+pelN(k.pelatisId)+'</option>';
+  ps.value=k.pelatisId;ps._fixed=true;
+  document.getElementById('ord-date').value=k.date;
+  document.getElementById('ord-notes').value=k.notes||'';
+  document.getElementById('ord-title').textContent='Επεξεργασία Κίνησης';
+  buildEidosGrid();renderOrdSel();
+  var btn=document.querySelector('#m-order .btn-blue');
+  btn.onclick=function(){
+    if(!ordItems.length){toast('⚠️ Επιλέξτε τουλάχιστον ένα είδος');return;}
+    if(!confirm('Αποθήκευση αλλαγών στην κίνηση;'))return;
+    k.items=ordItems.slice();k.notes=document.getElementById('ord-notes').value.trim();
+    saveDB();btn.onclick=saveOrder;closeM('m-order');toast('✅ Η κίνηση ενημερώθηκε');
+  };
+  openM('m-order');
+}
+
+function delKin(id){
+  if(!confirm('Διαγραφή κίνησης; Η ενέργεια δεν αναιρείται.'))return;
+  DB.kiniseis=DB.kiniseis.filter(function(x){return x.id!==id;});
+  saveDB();
+  var ap=document.querySelector('.page.active');
+  if(ap){var pid=ap.id.replace('page-','');if(pid==='tameio')renderTameio();if(pid==='kiniseis')renderKiniseis();if(pid==='kartela'&&curPelId)renderKartela(curPelId);}
+  toast('🗑️ Διαγράφηκε');
+}
+
+// ΠΛΗΡΩΜΗ
+function openPlirModal(){
+  document.getElementById('plir-date').value=today();
+  document.getElementById('plir-amt').value='';
+  document.getElementById('plir-notes').value='';
+  document.getElementById('plir-tropos').value='cash';
+  var sel=document.getElementById('plir-pel');
+  sel.innerHTML='<option value="">-- Επιλέξτε πελάτη --</option>'+
+    [...DB.pelates].sort(function(a,b){return a.name.localeCompare(b.name,'el');}).map(function(p){return '<option value="'+p.id+'">'+p.name+(p.area?' ('+p.area+')':'')+'</option>';}).join('');
+  sel.value='';updatePlirYp();
+  openM('m-plir');
+}
+
+function openPlirFor(pelId){openPlirModal();document.getElementById('plir-pel').value=pelId;updatePlirYp();}
+
+function updatePlirYp(){
+  var pelId=document.getElementById('plir-pel').value;
+  var box=document.getElementById('plir-yp-box');
+  var val=document.getElementById('plir-yp-val');
+  var pills=document.getElementById('plir-pills');
+  if(!pelId){box.style.display='none';pills.innerHTML='';document.getElementById('plir-diff-box').style.display='none';return;}
+  var yp=pelYp(pelId);
+  box.style.display=yp>0?'block':'none';
+  val.textContent=eur(yp);
+  var amts=[5,10,20,50,100,Math.round(yp*100)/100].filter(function(a){return a>0&&a<=yp+0.01;});
+  var uniq=[...new Set(amts.map(function(a){return Math.round(a*100)/100;}))].sort(function(a,b){return a-b;});
+  pills.innerHTML=uniq.map(function(a){return '<div class="ppill" onclick="document.getElementById(\'plir-amt\').value=\''+a.toFixed(2)+'\';updatePlirDiff()">€'+(a%1===0?a:a.toFixed(2))+'</div>';}).join('');
+  updatePlirDiff();
+}
+
+function updatePlirDiff(){
+  var pelId=document.getElementById('plir-pel').value;
+  if(!pelId){document.getElementById('plir-diff-box').style.display='none';return;}
+  var yp=pelYp(pelId);
+  var amount=parseFloat(document.getElementById('plir-amt').value)||0;
+  var diff=Math.round((yp-amount)*100)/100;
+  var diffBox=document.getElementById('plir-diff-box');
+  if(diff>0.005&&amount>0){
+    diffBox.style.display='block';
+    document.getElementById('plir-diff-val').textContent=eur(diff);
+  } else {
+    diffBox.style.display='none';
+  }
+}
+
+function savePlir(){
+  var pelId=document.getElementById('plir-pel').value;
+  var amount=parseFloat(document.getElementById('plir-amt').value)||0;
+  if(!pelId){toast('⚠️ Επιλέξτε πελάτη');return;}
+  if(amount<=0){toast('⚠️ Εισάγετε ποσό');return;}
+  var date=document.getElementById('plir-date').value||today();
+  var now=new Date();
+  var timeStr=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  DB.pliromes.push({id:uid(),date:date,time:timeStr,pelatisId:pelId,amount:amount,tropos:document.getElementById('plir-tropos').value,notes:document.getElementById('plir-notes').value.trim()});
+  // Κέρασμα διαφοράς
+  var kerCb=document.getElementById('plir-ker-cb');
+  if(kerCb&&kerCb.checked){
+    var charged=DB.kiniseis.filter(function(k){return k.pelatisId===pelId;}).reduce(function(s,k){return s+kinCharged(k);},0);
+    var paid=DB.pliromes.filter(function(p){return p.pelatisId===pelId;}).reduce(function(s,p){return s+p.amount;},0);
+    var diff=Math.round((charged-paid)*100)/100;
+    if(diff>0.005){
+      var fakeEid='ker_diff_'+uid();
+      var existing=DB.kiniseis.find(function(k){return k.pelatisId===pelId&&k.date===date&&!k.isMetafora;});
+      if(existing){existing.items.push({eidosId:fakeEid,price:diff,kerasma:true,customName:'Κέρασμα διαφοράς'});}
+      else{DB.kiniseis.push({id:uid(),date:date,pelatisId:pelId,items:[{eidosId:fakeEid,price:diff,kerasma:true,customName:'Κέρασμα διαφοράς'}],notes:'Κέρασμα διαφοράς'});}
+      DB.pliromes.push({id:uid(),date:date,pelatisId:pelId,amount:diff,tropos:'kerasma',notes:'Εξόφληση κεράσματος'});
+      toast('✅ Πληρωμή '+eur(amount)+' + Κέρασμα '+eur(diff)+' - '+pelN(pelId));
+    }
+  } else {
+    toast('✅ Πληρωμή '+eur(amount)+' - '+pelN(pelId));
+  }
+  saveDB();closeM('m-plir');
+}
+
+function delPlir(id){
+  if(!confirm('Διαγραφή πληρωμής; Η ενέργεια δεν αναιρείται.'))return;
+  DB.pliromes=DB.pliromes.filter(function(x){return x.id!==id;});
+  saveDB();
+  var ap=document.querySelector('.page.active');if(ap){var pid=ap.id.replace('page-','');if(pid==='pliromes')renderPliromes();if(pid==='kartela'&&curPelId)renderKartela(curPelId);}
+  toast('🗑️ Διαγράφηκε');
+}
+
+// ΠΕΛΑΤΕΣ
+var kpiBlurred={};
+function toggleKpiBlur(id){
+  var el=document.getElementById(id);if(!el)return;
+  kpiBlurred[id]=!kpiBlurred[id];
+  el.style.filter=kpiBlurred[id]?'blur(6px)':'none';
+  el.style.userSelect=kpiBlurred[id]?'none':'auto';
+}
+
+function pelSort(a,b){
+  var aA=a.area||''; var bA=b.area||'';
+  var aFar=(aA==='ΛΕΣΒΟΣ'||aA==='ΑΘΗΝΑ');
+  var bFar=(bA==='ΛΕΣΒΟΣ'||bA==='ΑΘΗΝΑ');
+  var aLocal=(aA==='ΑΓΡΑ'); var bLocal=(bA==='ΑΓΡΑ');
+  if(aLocal&&!bLocal)return -1; if(bLocal&&!aLocal)return 1;
+  if(aFar&&!bFar)return 1; if(bFar&&!aFar)return -1;
+  return a.name.localeCompare(b.name,'el');
+}
+
+function renderPelates(){
+  var q=(document.getElementById('pel-q').value||'').toLowerCase();
+  var f=document.getElementById('pel-f').value;
+  var list=[...DB.pelates].sort(pelSort);
+  if(q)list=list.filter(function(p){return p.name.toLowerCase().includes(q)||(p.area||'').toLowerCase().includes(q);});
+  if(f==='debt')list=list.filter(function(p){return pelYp(p.id)>0;});
+  if(f==='ok')list=list.filter(function(p){return pelYp(p.id)<=0;});
+  var tbody=document.getElementById('pel-tbody');
+  if(!list.length){tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="ico">👥</div><p>Δεν βρέθηκαν πελάτες</p></div></td></tr>';return;}
+  tbody.innerHTML=list.map(function(p){
+    var yp=pelYp(p.id);
+    var kc=DB.kiniseis.filter(function(k){return k.pelatisId===p.id;}).length;
+    var rowBg=yp>0?'background:#fffafa;':'background:#f0fff4;';
+    var q1="'";
+    var row='<tr style="cursor:pointer;'+rowBg+'" onclick="openKar('+q1+p.id+q1+')">';
+    row+='<td><strong>'+p.name+'</strong></td>';
+    row+='<td class="text-dim">'+(p.area||'-')+'</td>';
+    row+='<td class="text-dim">'+(p.phone||'-')+'</td>';
+    row+='<td><span class="'+(yp>0?'text-red':'text-green')+'">'+eur(yp)+'</span></td>';
+    row+='<td class="text-dim">'+kc+'</td>';
+    row+='<td onclick="event.stopPropagation()">';
+    row+='<button class="btn btn-ghost btn-xs" onclick="editPel('+q1+p.id+q1+')">edit</button>';
+    row+='<button class="btn btn-red btn-xs" onclick="delPel('+q1+p.id+q1+')">x</button>';
+    row+='</td></tr>';
+    return row;
+  }).join('');
+}
+
+function openPelModal(id){
+  document.getElementById('mp-id').value=id||'';
+  document.getElementById('mp-title').textContent=id?'Επεξεργασία Πελάτη':'Νέος Πελάτης';
+  if(id){var p=DB.pelates.find(function(x){return x.id===id;});if(p){document.getElementById('mp-name').value=p.name;document.getElementById('mp-phone').value=p.phone||'';document.getElementById('mp-area').value=p.area||'';document.getElementById('mp-notes').value=p.notes||'';}}
+  else{['mp-name','mp-phone','mp-area','mp-notes'].forEach(function(i){document.getElementById(i).value='';});}
+  openM('m-pel');
+}
+function editPel(id){openPelModal(id);}
+
+function savePel(){
+  var name=document.getElementById('mp-name').value.trim().toUpperCase();
+  if(!name){toast('⚠️ Εισάγετε όνομα');return;}
+  var id=document.getElementById('mp-id').value;
+  var obj={id:id||uid(),name:name,phone:document.getElementById('mp-phone').value.trim(),area:document.getElementById('mp-area').value.trim().toUpperCase(),notes:document.getElementById('mp-notes').value.trim()};
+  if(id){var i=DB.pelates.findIndex(function(x){return x.id===id;});DB.pelates[i]=obj;}else DB.pelates.push(obj);
+  saveDB();closeM('m-pel');toast('✅ Ο πελάτης αποθηκεύτηκε');
+}
+
+function delPel(id){
+  if(!confirm('Διαγραφή πελάτη;'))return;
+  DB.pelates=DB.pelates.filter(function(x){return x.id!==id;});
+  saveDB();renderPelates();toast('🗑️ Διαγράφηκε');
+}
+
+// ΚΑΡΤΕΛΑ
+var curPelId=null;
+function openKar(pelId){curPelId=pelId;goPage('kartela');renderKartela(pelId);}
+
+function renderKartela(pelId){
+  var p=DB.pelates.find(function(x){return x.id===pelId;});if(!p)return;
+  var yp=pelYp(pelId);
+  document.getElementById('kar-name').textContent=p.name;
+  document.getElementById('kar-sub').textContent=(p.area||'')+(p.phone?' . '+p.phone:'');
+  var amEl=document.getElementById('kar-yp');
+  amEl.textContent=eur(yp);
+  amEl.style.color=yp>0?'#fc8181':'#68d391';
+  document.getElementById('kar-yp-sub').textContent=yp>0?'Οφείλει':'Εξοφλημένος';
+  var kins=[...DB.kiniseis].filter(function(k){return k.pelatisId===pelId;}).sort(function(a,b){return b.date.localeCompare(a.date);});
+  document.getElementById('kar-kin-body').innerHTML=kins.length?kins.map(function(k){return '<tr><td>'+fmt(k.date)+'</td><td style="font-size:12px;max-width:220px">'+kinDesc(k)+'</td><td class="text-gold">'+eur(kinCharged(k))+'</td><td class="text-dim">'+(kinKer(k)>0?eur(kinKer(k)):'-')+'</td><td style="font-size:12px;color:#718096">'+(k.notes||'')+'</td><td><button class="btn btn-ghost btn-xs" onclick="editKin(\''+k.id+'\')">✏</button><button class="btn btn-red btn-xs" onclick="delKin(\''+k.id+'\')">✕</button></td></tr>';}).join(''):'<tr><td colspan="6"><div class="empty" style="padding:20px"><p>Δεν υπάρχουν κινήσεις</p></div></td></tr>';
+  var plirs=[...DB.pliromes].filter(function(p){return p.pelatisId===pelId;}).sort(function(a,b){return b.date.localeCompare(a.date);});
+  document.getElementById('kar-plir-body').innerHTML=plirs.length?plirs.map(function(pl){return '<tr><td>'+fmt(pl.date)+(pl.time?' <span style="color:#718096;font-size:10px">['+pl.time+']</span>':'')+'</td><td class="text-green">'+eur(pl.amount)+'</td><td><span class="badge bg-gray">'+(pl.tropos==='cash'?'Μετρητά':'Κάρτα')+'</span></td><td class="text-dim">'+(pl.notes||'')+'</td><td><button class="btn btn-red btn-xs" onclick="delPlir(\''+pl.id+'\')">✕</button></td></tr>';}).join(''):'<tr><td colspan="5"><div class="empty" style="padding:20px"><p>Δεν υπάρχουν πληρωμές</p></div></td></tr>';
+  var events=kins.map(function(k){return {date:k.date,type:'kin',amount:kinCharged(k),desc:kinDesc(k)};}).concat(plirs.map(function(pl){return {date:pl.date,type:'plir',amount:pl.amount,desc:(pl.tropos==='cash'?'Μετρητά':'Κάρτα')+(pl.notes?' . '+pl.notes:'')};}).sort(function(a,b){return b.date.localeCompare(a.date);}));
+  var running=yp;
+  document.getElementById('kar-hist-body').innerHTML=events.length?events.map(function(ev){var snap=running;if(ev.type==='kin')running+=ev.amount;else running-=ev.amount;return '<tr><td>'+fmt(ev.date)+'</td><td><span class="badge '+(ev.type==='kin'?'bg-gold':'bg-green')+'">'+(ev.type==='kin'?'Παραγγελία':'Πληρωμή')+'</span></td><td style="font-size:12px">'+ev.desc+'</td><td class="'+(ev.type==='kin'?'text-gold':'text-green')+'">'+(ev.type==='kin'?'+':'−')+eur(ev.amount)+'</td><td class="'+(snap>0?'text-red':'text-green')+'">'+eur(snap)+'</td></tr>';}).join(''):'<tr><td colspan="5"><div class="empty" style="padding:20px"><p>Δεν υπάρχει ιστορικό</p></div></td></tr>';
+}
+
+function karTab(tab,el){
+  ['kin','plir','hist'].forEach(function(t){document.getElementById('kar-'+t).style.display=t===tab?'block':'none';});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+}
+
+// ΚΙΝΗΣΕΙΣ
+function initKin(){
+  if(!document.getElementById('kin-from').value){var d=new Date();var m=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01';document.getElementById('kin-from').value=m;document.getElementById('kin-to').value=today();}
+  renderKiniseis();
+}
+function renderKiniseis(){
+  var from=document.getElementById('kin-from').value;var to=document.getElementById('kin-to').value;var q=(document.getElementById('kin-q').value||'').toLowerCase();
+  var list=[...DB.kiniseis];
+  if(from)list=list.filter(function(k){return k.date>=from;});
+  if(to)list=list.filter(function(k){return k.date<=to;});
+  if(q)list=list.filter(function(k){return pelN(k.pelatisId).toLowerCase().includes(q);});
+  list.sort(function(a,b){return b.date.localeCompare(a.date)||pelN(a.pelatisId).localeCompare(pelN(b.pelatisId),'el');});
+  var total=list.reduce(function(s,k){return s+kinCharged(k);},0);
+  document.getElementById('kin-sum').textContent=list.length+' κινήσεις . '+eur(total);
+  document.getElementById('kin-tbody').innerHTML=list.length?list.map(function(k){return '<tr><td>'+fmt(k.date)+'</td><td style="cursor:pointer" onclick="openKar(\''+k.pelatisId+'\')"><strong>'+pelN(k.pelatisId)+'</strong></td><td style="font-size:12px;max-width:200px">'+kinDesc(k)+'</td><td class="text-gold">'+eur(kinCharged(k))+'</td><td class="text-dim">'+(kinKer(k)>0?eur(kinKer(k)):'-')+'</td><td style="font-size:12px;color:#718096">'+(k.notes||'')+'</td><td><button class="btn btn-ghost btn-xs" onclick="editKin(\''+k.id+'\')">✏</button><button class="btn btn-red btn-xs" onclick="delKin(\''+k.id+'\')">✕</button></td></tr>';}).join(''):'<tr><td colspan="7"><div class="empty"><div class="ico">📋</div><p>Δεν βρέθηκαν κινήσεις</p></div></td></tr>';
+}
+
+// ΠΛΗΡΩΜΕΣ
+function initPlir(){
+  if(!document.getElementById('plir-from').value){var d=new Date();var m=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01';document.getElementById('plir-from').value=m;document.getElementById('plir-to').value=today();}
+  renderPliromes();
+}
+function renderPliromes(){
+  var from=document.getElementById('plir-from').value;var to=document.getElementById('plir-to').value;
+  var list=[...DB.pliromes];
+  if(from)list=list.filter(function(p){return p.date>=from;});
+  if(to)list=list.filter(function(p){return p.date<=to;});
+  list.sort(function(a,b){return b.date.localeCompare(a.date);});
+  var total=list.reduce(function(s,p){return s+p.amount;},0);
+  document.getElementById('plir-sum').textContent=list.length+' πληρωμές . '+eur(total);
+  document.getElementById('plir-tbody').innerHTML=list.length?list.map(function(p){return '<tr><td>'+fmt(p.date)+'</td><td style="cursor:pointer" onclick="openKar(\''+p.pelatisId+'\')"><strong>'+pelN(p.pelatisId)+'</strong></td><td class="text-green">'+eur(p.amount)+'</td><td><span class="badge bg-gray">'+(p.tropos==='cash'?'Μετρητά':'Κάρτα')+'</span></td><td class="text-dim">'+(p.notes||'')+'</td><td><button class="btn btn-red btn-xs" onclick="delPlir(\''+p.id+'\')">✕</button></td></tr>';}).join(''):'<tr><td colspan="6"><div class="empty"><div class="ico">💳</div><p>Δεν βρέθηκαν πληρωμές</p></div></td></tr>';
+}
+
+// ΕΞΟΔΑ
+function initEks(){
+  if(!document.getElementById('eks-from').value){var d=new Date();var m=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01';document.getElementById('eks-from').value=m;document.getElementById('eks-to').value=today();}
+  document.getElementById('ek-date').value=today();
+  populatePromSel();renderEksoda();
+}
+function populatePromSel(){
+  var proms=DB.promitheftes.sort(function(a,b){return a.name.localeCompare(b.name,'el');});
+  var opts='<option value="">-- Χωρίς προμηθευτή --</option>'+proms.map(function(p){return '<option value="'+p.id+'">'+p.name+'</option>';}).join('');
+  document.getElementById('ek-prom-id').innerHTML=opts;
+  var fs=document.getElementById('eks-prom-f');
+  if(fs)fs.innerHTML='<option value="">Όλοι προμηθευτές</option>'+proms.map(function(p){return '<option value="'+p.id+'">'+p.name+'</option>';}).join('');
+}
+function renderEksoda(){
+  var from=document.getElementById('eks-from').value;var to=document.getElementById('eks-to').value;var fp=document.getElementById('eks-prom-f')?document.getElementById('eks-prom-f').value:'';
+  var list=[...DB.eksoda];
+  if(from)list=list.filter(function(e){return e.date>=from;});
+  if(to)list=list.filter(function(e){return e.date<=to;});
+  if(fp)list=list.filter(function(e){return e.promId===fp;});
+  list.sort(function(a,b){return b.date.localeCompare(a.date);});
+  var total=list.reduce(function(s,e){return s+e.amount;},0);
+  document.getElementById('eks-total').textContent=eur(total);
+  document.getElementById('eks-count').textContent=list.length;
+  var totalDebt=DB.promitheftes.reduce(function(s,p){return s+Math.max(0,promYp(p.id));},0);
+  var debtEl=document.getElementById('eks-prom-debt');
+  if(debtEl)debtEl.textContent=eur(totalDebt);
+  document.getElementById('eks-tbody').innerHTML=list.length?list.map(function(e){return '<tr><td>'+fmt(e.date)+'</td><td><span class="badge bg-gray">'+(e.kat||'ΑΛΛΟ')+'</span></td><td>'+(e.desc||'-')+'</td><td class="text-dim">'+(e.promId?'<span style="cursor:pointer;color:#4299e1" onclick="openKarProm(\''+e.promId+'\')">'+promN(e.promId)+'</span>':'-')+'</td><td class="text-red">'+eur(e.amount)+'</td><td><button class="btn btn-red btn-xs" onclick="delEks(\''+e.id+'\')">✕</button></td></tr>';}).join(''):'<tr><td colspan="6"><div class="empty"><div class="ico">💸</div><p>Δεν βρέθηκαν έξοδα</p></div></td></tr>';
+}
+function openEksModal(){populatePromSel();openM('m-eks');}
+function saveEks(){
+  var amount=parseFloat(document.getElementById('ek-amt').value)||0;
+  var desc=document.getElementById('ek-desc').value.trim();
+  if(!desc||amount<=0){toast('⚠️ Συμπληρώστε περιγραφή και ποσό');return;}
+  var id=document.getElementById('ek-id').value;
+  var promId=document.getElementById('ek-prom-id').value;
+  var obj={id:id||uid(),date:document.getElementById('ek-date').value||today(),kat:document.getElementById('ek-kat').value.trim().toUpperCase(),desc:desc,promId:promId,prom:promId?promN(promId):'',amount:amount};
+  if(id){var i=DB.eksoda.findIndex(function(x){return x.id===id;});DB.eksoda[i]=obj;}else DB.eksoda.push(obj);
+  saveDB();closeM('m-eks');toast('✅ Το έξοδο αποθηκεύτηκε');
+}
+function delEks(id){
+  if(!confirm('Διαγραφή εξόδου;'))return;
+  DB.eksoda=DB.eksoda.filter(function(x){return x.id!==id;});
+  saveDB();renderEksoda();toast('🗑️ Διαγράφηκε');
+}
+
+// ΠΡΟΜΗΘΕΥΤΕΣ
+var curPromId=null;
+
+function promYp(promId){
+  var eks=DB.eksoda.filter(function(e){return e.promId===promId;}).reduce(function(s,e){return s+e.amount;},0);
+  var paid=(DB.promPliromes||[]).filter(function(p){return p.promId===promId;}).reduce(function(s,p){return s+p.amount;},0);
+  return Math.round((eks-paid)*100)/100;
+}
+
+function renderPromitheftes(){
+  var q=(document.getElementById('prom-q').value||'').toLowerCase();
+  var list=[...DB.promitheftes].sort(function(a,b){return a.name.localeCompare(b.name,'el');});
+  if(q)list=list.filter(function(p){return p.name.toLowerCase().includes(q)||(p.eidi||'').toLowerCase().includes(q);});
+  var tbody=document.getElementById('prom-tbody');
+  if(!list.length){tbody.innerHTML='<tr><td colspan="6"><div class="empty"><p>Δεν βρεθηκαν προμηθευτες</p></div></td></tr>';return;}
+  tbody.innerHTML=list.map(function(p){
+    var et=DB.eksoda.filter(function(e){return e.promId===p.id;}).reduce(function(s,e){return s+e.amount;},0);
+    var yp=promYp(p.id);
+    var ypCls=yp>0.005?'text-red':'text-green';
+    var q1="'";
+    var row='<tr style="cursor:pointer" onclick="openKarProm('+q1+p.id+q1+')">';
+    row+='<td><strong>'+p.name+'</strong></td>';
+    row+='<td class="text-dim">'+(p.phone||'-')+'</td>';
+    row+='<td class="text-dim" style="font-size:12px">'+(p.eidi||'-')+'</td>';
+    row+='<td class="text-red">'+eur(et)+'</td>';
+    row+='<td class="'+ypCls+'"><strong>'+eur(yp)+'</strong></td>';
+    row+='<td onclick="event.stopPropagation()">';
+    row+='<button class="btn btn-ghost btn-xs" onclick="editProm('+q1+p.id+q1+')">edit</button>';
+    row+='<button class="btn btn-red btn-xs" onclick="delProm('+q1+p.id+q1+')">x</button>';
+    row+='</td></tr>';
+    return row;
+  }).join('');
+}
+
+function openPromModal(id){
+  document.getElementById('mpr-id').value=id||'';
+  document.getElementById('mpr-title').textContent=id?'Επεξεργασία Προμηθευτή':'Νέος Προμηθευτής';
+  if(id){var p=DB.promitheftes.find(function(x){return x.id===id;});if(p){document.getElementById('mpr-name').value=p.name;document.getElementById('mpr-phone').value=p.phone||'';document.getElementById('mpr-eidi').value=p.eidi||'';document.getElementById('mpr-notes').value=p.notes||'';}}
+  else{['mpr-name','mpr-phone','mpr-eidi','mpr-notes'].forEach(function(i){document.getElementById(i).value='';});}
+  openM('m-prom');
+}
+function editProm(id){openPromModal(id);}
+function saveProm(){
+  var name=document.getElementById('mpr-name').value.trim().toUpperCase();
+  if(!name){toast('Εισαγετε ονομα');return;}
+  var id=document.getElementById('mpr-id').value;
+  var obj={id:id||uid(),name:name,phone:document.getElementById('mpr-phone').value.trim(),eidi:document.getElementById('mpr-eidi').value.trim(),notes:document.getElementById('mpr-notes').value.trim()};
+  if(id){var i=DB.promitheftes.findIndex(function(x){return x.id===id;});DB.promitheftes[i]=obj;}else DB.promitheftes.push(obj);
+  saveDB();closeM('m-prom');toast('Ο προμηθευτης αποθηκευτηκε');
+}
+function delProm(id){
+  if(!confirm('Διαγραφη προμηθευτη;'))return;
+  DB.promitheftes=DB.promitheftes.filter(function(x){return x.id!==id;});
+  saveDB();renderPromitheftes();toast('Διαγραφηκε');
+}
+function openKarProm(promId){
+  curPromId=promId;
+  goPage('karprom');
+}
+function renderKarProm(promId){
+  var p=DB.promitheftes.find(function(x){return x.id===promId;});if(!p)return;
+  document.getElementById('karprom-name').textContent=p.name;
+  document.getElementById('karprom-sub').textContent=(p.eidi||'')+(p.phone?' - '+p.phone:'');
+  var yp=promYp(promId);
+  document.getElementById('karprom-yp').textContent=eur(yp);
+  document.getElementById('karprom-yp-sub').textContent=yp>0.005?'Χρωσταμε':'Εντάξει';
+  var q1="'";
+  var eks=DB.eksoda.filter(function(e){return e.promId===promId;}).sort(function(a,b){return b.date.localeCompare(a.date);});
+  document.getElementById('karprom-eks-body').innerHTML=eks.length?eks.map(function(e){
+    var r='<tr><td>'+fmt(e.date)+'</td>';
+    r+='<td><span class="badge bg-gray">'+(e.kat||'ΑΛΛΟ')+'</span></td>';
+    r+='<td>'+(e.desc||'-')+'</td>';
+    r+='<td class="text-red">'+eur(e.amount)+'</td>';
+    r+='<td><button class="btn btn-red btn-xs" onclick="delEks('+q1+e.id+q1+')">x</button></td>';
+    r+='</tr>';
+    return r;
+  }).join(''):'<tr><td colspan="5"><div class="empty" style="padding:16px"><p>Δεν υπαρχουν εξοδα</p></div></td></tr>';
+  var plirs=(DB.promPliromes||[]).filter(function(pl){return pl.promId===promId;}).sort(function(a,b){return b.date.localeCompare(a.date);});
+  document.getElementById('karprom-plir-body').innerHTML=plirs.length?plirs.map(function(pl){
+    var r='<tr><td>'+fmt(pl.date)+'</td>';
+    r+='<td class="text-green">'+eur(pl.amount)+'</td>';
+    r+='<td><span class="badge bg-gray">'+pl.tropos+'</span></td>';
+    r+='<td class="text-dim">'+(pl.notes||'')+'</td>';
+    r+='<td><button class="btn btn-red btn-xs" onclick="delPromPlir('+q1+pl.id+q1+')">x</button></td>';
+    r+='</tr>';
+    return r;
+  }).join(''):'<tr><td colspan="5"><div class="empty" style="padding:16px"><p>Δεν υπαρχουν πληρωμες</p></div></td></tr>';
+  var allEv=eks.map(function(e){return {date:e.date,type:'eks',amount:e.amount,desc:e.desc||''};})
+    .concat(plirs.map(function(pl){return {date:pl.date,type:'plir',amount:pl.amount,desc:pl.tropos+(pl.notes?' - '+pl.notes:'')};}))
+    .sort(function(a,b){return b.date.localeCompare(a.date);});
+  var running=yp;
+  document.getElementById('karprom-hist-body').innerHTML=allEv.length?allEv.map(function(ev){
+    var snap=running;
+    if(ev.type==='eks'){running-=ev.amount;}else{running+=ev.amount;}
+    var sign=ev.type==='eks'?'+':'-';
+    var amtCls=ev.type==='eks'?'text-red':'text-green';
+    var balCls=snap>0?'text-red':'text-green';
+    var typeBadge=ev.type==='eks'?'bg-red':'bg-green';
+    var typeLabel=ev.type==='eks'?'Αγορα':'Πληρωμη';
+    var r='<tr><td>'+fmt(ev.date)+'</td>';
+    r+='<td><span class="badge '+typeBadge+'">'+typeLabel+'</span></td>';
+    r+='<td style="font-size:12px">'+ev.desc+'</td>';
+    r+='<td class="'+amtCls+'">'+sign+eur(ev.amount)+'</td>';
+    r+='<td class="'+balCls+'">'+eur(snap)+'</td></tr>';
+    return r;
+  }).join(''):'<tr><td colspan="5"><div class="empty" style="padding:16px"><p>Δεν υπαρχει ιστορικο</p></div></td></tr>';
+}
+
+function karPromTab(tab,el){
+  ['eksoda','pliromes','hist'].forEach(function(t){document.getElementById('karprom-'+t).style.display=t===tab?'block':'none';});
+  document.querySelectorAll('#page-karprom .tab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+}
+function openPromPlirModal(){
+  if(!curPromId)return;
+  var p=DB.promitheftes.find(function(x){return x.id===curPromId;});if(!p)return;
+  document.getElementById('pp-prom-id').value=curPromId;
+  document.getElementById('pp-prom-name').textContent=p.name;
+  document.getElementById('pp-yp-val').textContent=eur(promYp(curPromId));
+  document.getElementById('pp-amt').value='';
+  document.getElementById('pp-notes').value='';
+  document.getElementById('pp-date').value=today();
+  openM('m-prom-plir');
+}
+function savePromPlir(){
+  var promId=document.getElementById('pp-prom-id').value;
+  var amount=parseFloat(document.getElementById('pp-amt').value)||0;
+  if(amount<=0){toast('Εισαγετε ποσο');return;}
+  if(!DB.promPliromes)DB.promPliromes=[];
+  DB.promPliromes.push({id:uid(),promId:promId,date:document.getElementById('pp-date').value||today(),amount:amount,tropos:document.getElementById('pp-tropos').value,notes:document.getElementById('pp-notes').value.trim()});
+  saveDB();closeM('m-prom-plir');toast('Πληρωμη '+eur(amount));
+  renderKarProm(promId);renderPromitheftes();
+}
+function delPromPlir(id){
+  if(!confirm('Διαγραφη πληρωμης;'))return;
+  DB.promPliromes=(DB.promPliromes||[]).filter(function(x){return x.id!==id;});
+  saveDB();renderKarProm(curPromId);renderPromitheftes();toast('Διαγραφηκε');
+}
+function openEksForProm(){
+  openEksModal();
+  if(curPromId){setTimeout(function(){document.getElementById('ek-prom-id').value=curPromId;},80);}
+}
+// ΕΙΔΗ
+function renderEidi(){
+  var f=document.getElementById('eid-kat-f').value;
+  var kats=getKats();
+  var sel=document.getElementById('eid-kat-f');var cur=sel.value;
+  sel.innerHTML='<option value="">Όλες κατηγορίες</option>'+kats.map(function(k){return '<option '+(k===cur?'selected':'')+'>'+k+'</option>';}).join('');
+  document.getElementById('me-kat-dl').innerHTML=kats.map(function(k){return '<option>'+k+'</option>';}).join('');
+  var list=[...DB.eidi].sort(function(a,b){return a.kat.localeCompare(b.kat)||a.name.localeCompare(b.name);});
+  if(f)list=list.filter(function(e){return e.kat===f;});
+  document.getElementById('eid-tbody').innerHTML=list.length?list.map(function(e){return '<tr><td><span class="badge bg-blue">'+e.kat+'</span></td><td><strong>'+e.name+'</strong></td><td class="text-gold">'+eur(e.price)+'</td><td class="text-dim">'+eur(e.priceKer)+'</td><td><button class="btn btn-ghost btn-xs" onclick="editEidos(\''+e.id+'\')">✏</button><button class="btn btn-red btn-xs" onclick="delEidos(\''+e.id+'\')">✕</button></td></tr>';}).join(''):'<tr><td colspan="5"><div class="empty"><div class="ico">🍵</div><p>Δεν βρέθηκαν είδη</p></div></td></tr>';
+}
+function openEidosModal(id){
+  document.getElementById('me-id').value=id||'';
+  document.getElementById('me-title').textContent=id?'Επεξεργασία Είδους':'Νέο Είδος';
+  if(id){var e=DB.eidi.find(function(x){return x.id===id;});if(e){document.getElementById('me-kat').value=e.kat;document.getElementById('me-name').value=e.name;document.getElementById('me-price').value=e.price;document.getElementById('me-price-ker').value=e.priceKer||0;}}
+  else{['me-kat','me-name'].forEach(function(i){document.getElementById(i).value='';});document.getElementById('me-price').value=0;document.getElementById('me-price-ker').value=0;}
+  openM('m-eidos');
+}
+function editEidos(id){openEidosModal(id);}
+function saveEidos(){
+  var kat=document.getElementById('me-kat').value.trim().toUpperCase();
+  var name=document.getElementById('me-name').value.trim().toUpperCase();
+  if(!kat||!name){toast('⚠️ Εισάγετε κατηγορία και όνομα');return;}
+  var id=document.getElementById('me-id').value;
+  var obj={id:id||uid(),kat:kat,name:name,price:parseFloat(document.getElementById('me-price').value)||0,priceKer:parseFloat(document.getElementById('me-price-ker').value)||0};
+  if(id){var i=DB.eidi.findIndex(function(x){return x.id===id;});DB.eidi[i]=obj;}else DB.eidi.push(obj);
+  saveDB();closeM('m-eidos');toast('✅ Το είδος αποθηκεύτηκε');
+}
+function delEidos(id){
+  if(!confirm('Διαγραφή είδους;'))return;
+  DB.eidi=DB.eidi.filter(function(x){return x.id!==id;});
+  saveDB();renderEidi();toast('🗑️ Διαγράφηκε');
+}
+
+// ΣΤΑΤΙΣΤΙΚΑ
+function initStat(){
+  if(!document.getElementById('stat-from').value){var d=new Date();var m=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01';document.getElementById('stat-from').value=m;document.getElementById('stat-to').value=today();}
+  renderStat();
+}
+function renderStat(){
+  var from=document.getElementById('stat-from').value;var to=document.getElementById('stat-to').value;
+  var kins=[...DB.kiniseis];var plirs=[...DB.pliromes];
+  if(from){kins=kins.filter(function(k){return k.date>=from;});plirs=plirs.filter(function(p){return p.date>=from;});}
+  if(to){kins=kins.filter(function(k){return k.date<=to;});plirs=plirs.filter(function(p){return p.date<=to;});}
+  var pol=kins.reduce(function(s,k){return s+kinCharged(k);},0);
+  var eisp=plirs.reduce(function(s,p){return s+p.amount;},0);
+  var allYp=DB.pelates.reduce(function(s,p){return s+Math.max(0,pelYp(p.id));},0);
+  document.getElementById('st-pol').textContent=eur(pol);
+  document.getElementById('st-eisp').textContent=eur(eisp);
+  document.getElementById('st-yp').textContent=eur(allYp);
+  document.getElementById('st-kin').textContent=kins.length;
+  var byPel={};
+  kins.forEach(function(k){byPel[k.pelatisId]=(byPel[k.pelatisId]||0)+kinCharged(k);});
+  var topPel=Object.entries(byPel).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+  var maxP=topPel[0]?topPel[0][1]:1;
+  document.getElementById('st-top-pel').innerHTML=topPel.length?topPel.map(function(x){var id=x[0];var v=x[1];return '<div style="display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid #e2e8f0;cursor:pointer" onclick="openKar(\''+id+'\')"><div style="flex:1;font-size:13px;font-weight:600">'+pelN(id)+'</div><div style="width:80px;height:5px;background:#f0f4f8;border-radius:3px"><div style="width:'+((v/maxP)*100)+'%;height:100%;background:#ed8936;border-radius:3px"></div></div><div style="font-size:12px;font-weight:700;color:#c05621;min-width:60px;text-align:right">'+eur(v)+'</div></div>';}).join(''):'<div class="empty" style="padding:16px"><p>Δεν υπάρχουν δεδομένα</p></div>';
+  var byEid={};
+  kins.forEach(function(k){k.items.forEach(function(i){if(!i.kerasma)byEid[i.eidosId]=(byEid[i.eidosId]||0)+1;});});
+  var topEid=Object.entries(byEid).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+  var maxE=topEid[0]?topEid[0][1]:1;
+  document.getElementById('st-top-eid').innerHTML=topEid.length?topEid.map(function(x){var id=x[0];var cnt=x[1];return '<div style="display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid #e2e8f0"><div style="flex:1;font-size:13px;font-weight:600">'+eidN(id)+'</div><div style="width:80px;height:5px;background:#f0f4f8;border-radius:3px"><div style="width:'+((cnt/maxE)*100)+'%;height:100%;background:#4299e1;border-radius:3px"></div></div><div style="font-size:12px;font-weight:700;color:#2b6cb0;min-width:40px;text-align:right">'+cnt+'×</div></div>';}).join(''):'<div class="empty" style="padding:16px"><p>Δεν υπάρχουν δεδομένα</p></div>';
+  // Ημερήσια ανάλυση
+  var allDates=[...new Set(kins.map(function(k){return k.date;}).concat(plirs.map(function(p){return p.date;})))].sort().reverse();
+  var ttPol=0,ttEisp=0,ttDays=0;
+  var dailyHtml=allDates.map(function(d){
+    var dKin=kins.filter(function(k){return k.date===d&&!k.isMetafora;});
+    var dPlir=plirs.filter(function(p){return p.date===d;});
+    var dpol=dKin.reduce(function(s,k){return s+kinCharged(k);},0);
+    var dker=dKin.reduce(function(s,k){return s+kinKer(k);},0);
+    var decisp=dPlir.reduce(function(s,p){return s+p.amount;},0);
+    var dpist=Math.max(0,dpol-decisp);
+    ttPol+=dpol;ttEisp+=decisp;ttDays++;
+    return '<tr><td>'+fmt(d)+'</td>'+
+      '<td style="text-align:right;font-weight:700;color:#c05621">'+eur(dpol)+'</td>'+
+      '<td style="text-align:right;color:#276749;font-weight:700">'+eur(decisp)+'</td>'+
+      '<td style="text-align:right;color:'+(dpist>0?'#c53030':'#276749')+';font-weight:700">'+eur(dpist)+'</td>'+
+      '<td style="text-align:right;color:#2b6cb0">'+eur(dker)+'</td>'+
+      '<td style="text-align:right;color:#718096">'+dKin.length+'</td></tr>';
+  }).join('');
+  document.getElementById('st-daily-body').innerHTML=dailyHtml||'<tr><td colspan="6"><div class="empty" style="padding:16px"><p>Δεν υπάρχουν δεδομένα</p></div></td></tr>';
+  document.getElementById('st-daily-sum').textContent=ttDays+' ημέρες · Πωλ: '+eur(ttPol)+' · Εισπρ: '+eur(ttEisp);
+}
+
+// BACKUP
+function doExport(){
+  var blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='cafe-genesis-backup-'+today()+'.json';a.click();
+  toast('✅ Backup αποθηκεύτηκε!');
+}
+function doImport(ev){
+  var f=ev.target.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(e){
+    try{
+      var d=JSON.parse(e.target.result);
+      if(!d.pelates||!d.kiniseis){toast('⚠️ Μη έγκυρο αρχείο');return;}
+      if(!confirm('Εισαγωγή δεδομένων; Τα υπάρχοντα θα αντικατασταθούν.'))return;
+      DB=d;saveDB();goPage('tameio');toast('✅ Δεδομένα εισήχθησαν!');
+    }catch(err){toast('⚠️ Σφάλμα ανάγνωσης');}
+  };
+  r.readAsText(f);ev.target.value='';
+}
+
+// ΣΑΝΤΟΥΙΤΣ
+var swItems=[];
+var swEidosId=null;
+
+function openSandwich(eidosId){
+  swEidosId=eidosId;
+  swItems=[];
+  renderSwGrid();renderSwSel();
+  openM('m-sandwich');
+}
+
+function renderSwGrid(){
+  var g=document.getElementById('sw-eidos');
+  var ulika=DB.eidi.filter(function(e){return e.kat==='ΥΛΙΚΑ ΣΑΝΤΟΥΙΤΣ';});
+  if(!ulika.length){
+    g.innerHTML='<div style="grid-column:1/-1;padding:20px;text-align:center;color:#718096">'+
+      '<p>Δεν υπάρχουν υλικά!</p>'+
+      '<p style="font-size:12px;margin-top:6px">Πρόσθεσε υλικά στα Είδη με κατηγορία <strong>ΥΛΙΚΑ ΣΑΝΤΟΥΙΤΣ</strong></p>'+
+      '</div>';
+    return;
+  }
+  g.innerHTML=ulika.map(function(e){
+    var cnt=swItems.filter(function(i){return i.eidosId===e.id;}).length;
+    return '<div class="eidos-btn '+(cnt>0?'sel':'')+'" id="sw-'+e.id+'" onclick="addSwItem(\''+e.id+'\')">'+
+      '<span>'+(cnt>0?cnt+'× ':'')+e.name+'</span>'+
+      '<span class="ep">'+eur(e.price)+'</span>'+
+      '</div>';
+  }).join('');
+}
+
+function addSwItem(eidosId){
+  var e=DB.eidi.find(function(x){return x.id===eidosId;});
+  if(!e)return;
+  swItems.push({eidosId:eidosId,price:e.price,kerasma:false,name:e.name});
+  renderSwGrid();renderSwSel();
+}
+
+function removeSwItem(idx){swItems.splice(idx,1);renderSwGrid();renderSwSel();}
+
+function renderSwSel(){
+  var wrap=document.getElementById('sw-sel-wrap');
+  var cont=document.getElementById('sw-sel');
+  var total=swItems.reduce(function(s,i){return s+i.price;},0);
+  document.getElementById('sw-total').textContent=eur(total);
+  if(!swItems.length){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  var groups={};
+  swItems.forEach(function(it,idx){
+    if(!groups[it.eidosId])groups[it.eidosId]={eidosId:it.eidosId,price:it.price,name:it.name,indices:[]};
+    groups[it.eidosId].indices.push(idx);
+  });
+  cont.innerHTML=Object.values(groups).map(function(g){
+    return '<div class="sel-item">'+
+      '<span class="sel-item-name">'+(g.indices.length>1?g.indices.length+'× ':'')+g.name+'</span>'+
+      '<span class="sel-item-amt">'+eur(g.price*g.indices.length)+'</span>'+
+      '<div class="sel-item-ctrl">'+
+        '<button class="ctrl-btn" onclick="addSwItem(\''+g.eidosId+'\')">+</button>'+
+        '<button class="ctrl-btn" onclick="removeSwItem('+g.indices[g.indices.length-1]+')">−</button>'+
+      '</div></div>';
+  }).join('');
+}
+
+function saveSandwich(){
+  if(!swItems.length){toast('⚠️ Επίλεξε τουλάχιστον ένα υλικό');return;}
+  var total=swItems.reduce(function(s,i){return s+i.price;},0);
+  var names=Object.values(swItems.reduce(function(g,it){
+    if(!g[it.eidosId])g[it.eidosId]={name:it.name,cnt:0};
+    g[it.eidosId].cnt++;return g;
+  },{})).map(function(x){return (x.cnt>1?x.cnt+'× ':'')+x.name;}).join(', ');
+  // Προσθέτω ένα custom item στην παραγγελία
+  ordItems.push({eidosId:swEidosId,price:total,kerasma:false,isSandwich:true,sandwichDesc:names,sandwichItems:swItems.slice()});
+  closeM('m-sandwich');
+  renderOrdSel();
+  toast('🥪 Σάντουιτς προστέθηκε: '+eur(total));
+}
+
+function closeSandwich(){closeM('m-sandwich');}
+
+
+// KPI EYE TOGGLE
+var kpiVisible = {pol: true, eisp: true};
+function toggleKpi(elId, rawId){
+  var el = document.getElementById(elId);
+  var key = elId === 'tk-pol' ? 'pol' : 'eisp';
+  kpiVisible[key] = !kpiVisible[key];
+  if(kpiVisible[key]){
+    el.style.filter = '';
+  } else {
+    el.style.filter = 'blur(6px)';
+  }
+}
+
+// FILTER TABS
+var tamFilter = 'open';
+function setTamFilter(f){
+  tamFilter = f;
+  document.getElementById('tab-anoixtes').style.background = f==='open'?'#fff5f5':'#f7fafc';
+  document.getElementById('tab-anoixtes').style.color = f==='open'?'#c53030':'#4a5568';
+  document.getElementById('tab-anoixtes').style.borderColor = f==='open'?'#feb2b2':'#e2e8f0';
+  document.getElementById('tab-oles').style.background = f==='all'?'#ebf8ff':'#f7fafc';
+  document.getElementById('tab-oles').style.color = f==='all'?'#2b6cb0':'#4a5568';
+  document.getElementById('tab-oles').style.borderColor = f==='all'?'#bee3f8':'#e2e8f0';
+  renderTameio();
+}
+
+// ΧΕΙΡΟΚΙΝΗΤΗ ΧΡΕΩΣΗ
+function openChreosi(){
+  var sel = document.getElementById('chr-pel');
+  sel.innerHTML = '<option value="">-- Επιλέξτε --</option>'+
+    [...DB.pelates].sort(function(a,b){
+      var aA=a.area||''; var bA=b.area||'';
+      if(aA==='ΑΓΡΑ'&&bA!=='ΑΓΡΑ')return -1;
+      if(bA==='ΑΓΡΑ'&&aA!=='ΑΓΡΑ')return 1;
+      return a.name.localeCompare(b.name,'el');
+    }).map(function(p){return '<option value="'+p.id+'">'+p.name+(p.area?' ('+p.area+')':'')+'</option>';}).join('');
+  document.getElementById('chr-desc').value = '';
+  document.getElementById('chr-amt').value = '';
+  document.getElementById('chr-date').value = today();
+  openM('m-chreosi');
+}
+
+function saveChreosi(){
+  var pelId = document.getElementById('chr-pel').value;
+  var desc = document.getElementById('chr-desc').value.trim() || 'Χειροκίνητη χρέωση';
+  var amount = parseFloat(document.getElementById('chr-amt').value)||0;
+  var date = document.getElementById('chr-date').value || today();
+  if(!pelId){toast('Επιλέξτε πελάτη');return;}
+  if(amount<=0){toast('Εισάγετε ποσό');return;}
+  // Δημιουργία custom είδους με χειροκίνητο ποσό
+  var fakeEid = 'custom_'+uid();
+  var kin = {id:uid(),date:date,pelatisId:pelId,items:[{eidosId:fakeEid,price:amount,kerasma:false,customName:desc}],notes:desc};
+  DB.kiniseis.push(kin);
+  saveDB();closeM('m-chreosi');
+  toast('Χρέωση '+eur(amount)+' στον '+pelN(pelId));
+  renderTameio();
+}
+
+// ΜΕΤΑΦΟΡΑ ΚΙΝΗΣΗΣ (κέρασμα)
+var metakinId = null;
+
+function openMetakinSelect(pelId){
+  var d=document.getElementById('tam-date').value||today();
+  var pKin=DB.kiniseis.filter(function(k){return k.pelatisId===pelId&&k.date===d&&!k.isMetafora;});
+  if(!pKin.length){toast('Δεν βρέθηκαν κινήσεις');return;}
+  if(pKin.length===1){openMetakin(pKin[0].id);return;}
+  var opts=pKin.map(function(k,i){return (i+1)+'. '+kinDesc(k)+' ('+eur(kinCharged(k))+')';}).join(String.fromCharCode(10));
+  var msg='Επίλεξε κίνηση για μεταφορά (γράψε αριθμό):'+String.fromCharCode(10)+opts;
+  var idx=prompt(msg);
+  if(!idx)return;
+  var num=parseInt(idx)-1;
+  if(num>=0&&num<pKin.length)openMetakin(pKin[num].id);
+  else toast('Μη έγκυρη επιλογή');
+}
+
+
+function openMetakin(kinId){
+  metakinId=kinId;
+  var k=DB.kiniseis.find(function(x){return x.id===kinId;});
+  if(!k)return;
+  document.getElementById('metakin-info').innerHTML='<strong>'+pelN(k.pelatisId)+'</strong> — '+kinDesc(k)+' ('+eur(kinCharged(k))+')';
+  var itemsDiv=document.getElementById('metakin-items');
+  var groups={};
+  k.items.forEach(function(it,idx){
+    var key=it.eidosId+'|'+(it.kerasma?'1':'0');
+    if(!groups[key])groups[key]={eidosId:it.eidosId,kerasma:it.kerasma,price:it.price,name:it.customName||eidN(it.eidosId),indices:[]};
+    groups[key].indices.push(idx);
+  });
+  itemsDiv.innerHTML=Object.values(groups).map(function(g){
+    return '<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f7fafc;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer">'+
+      '<input type="checkbox" class="metakin-cb" data-indices="'+g.indices.join(',')+'" checked style="width:16px;height:16px;cursor:pointer">'+
+      '<span style="flex:1;font-size:13px;font-weight:600">'+(g.indices.length>1?g.indices.length+'× ':'')+g.name+(g.kerasma?' 🎁':'')+'</span>'+
+      '<span style="color:#c05621;font-weight:700;font-size:12px">'+eur(g.price*g.indices.length)+'</span>'+
+      '</label>';
+  }).join('');
+  var sel=document.getElementById('metakin-pel');
+  sel.innerHTML='<option value="">-- Επιλέξτε --</option>'+
+    [...DB.pelates].filter(function(p){return p.id!==k.pelatisId;})
+    .sort(pelSort).map(function(p){return '<option value="'+p.id+'">'+p.name+(p.area?' ('+p.area+')':'')+'</option>';}).join('');
+  openM('m-metakin');
+}
+
+function saveMetakin(){
+  var newPelId=document.getElementById('metakin-pel').value;
+  if(!newPelId){toast('Επιλέξτε πελάτη');return;}
+  var k=DB.kiniseis.find(function(x){return x.id===metakinId;});
+  if(!k)return;
+  var cbs=document.querySelectorAll('.metakin-cb');
+  var selIdx=[];
+  cbs.forEach(function(cb){
+    if(cb.checked)cb.getAttribute('data-indices').split(',').forEach(function(i){selIdx.push(parseInt(i));});
+  });
+  if(!selIdx.length){toast('⚠️ Επιλέξτε τουλάχιστον ένα είδος');return;}
+  var oldName=pelN(k.pelatisId);
+  var d=document.getElementById('tam-date').value||today();
+  var transferItems=selIdx.map(function(i){return k.items[i];});
+  var remainItems=k.items.filter(function(it,i){return selIdx.indexOf(i)===-1;});
+  if(remainItems.length===0){
+    k.pelatisId=newPelId;
+  } else {
+    k.items=remainItems;
+    var existNew=DB.kiniseis.find(function(x){return x.pelatisId===newPelId&&x.date===d&&!x.isMetafora;});
+    if(existNew){existNew.items=existNew.items.concat(transferItems);}
+    else{DB.kiniseis.push({id:uid(),date:d,pelatisId:newPelId,items:transferItems,notes:'Μεταφορά από '+oldName});}
+  }
+  saveDB();closeM('m-metakin');
+  toast('✅ Μεταφορά από '+oldName+' → '+pelN(newPelId));
+  renderTameio();
+}
+
+// ΜΕΤΑΦΟΡΑ ΥΠΟΛΟΙΠΟΥ
+function openMetaforaModal(){
+  var sel=document.getElementById('met-pel');
+  sel.innerHTML='<option value="">-- Επιλεξτε --</option>'+
+    [...DB.pelates].sort(function(a,b){return a.name.localeCompare(b.name,'el');}).map(function(p){
+      return '<option value="'+p.id+'">'+p.name+(p.area?' ('+p.area+')':'')+'</option>';
+    }).join('');
+  document.getElementById('met-amt').value='';
+  document.getElementById('met-date').value='2025-01-01';
+  openM('m-metafora');
+}
+function saveMetafora(){
+  var pelId=document.getElementById('met-pel').value;
+  var amount=parseFloat(document.getElementById('met-amt').value)||0;
+  var date=document.getElementById('met-date').value||'2025-01-01';
+  var notes=document.getElementById('met-notes').value.trim()||'Μεταφορα απο παλιο προγραμμα';
+  if(!pelId){toast('Επιλεξτε πελατη');return;}
+  if(amount<=0){toast('Εισαγετε ποσο');return;}
+  DB.kiniseis.push({id:uid(),date:date,pelatisId:pelId,items:[{eidosId:'metafora',price:amount,kerasma:false,name:'ΜΕΤΑΦΟΡΑ'}],notes:notes,isMetafora:true});
+  saveDB();closeM('m-metafora');toast('Μεταφορα '+eur(amount)+' για '+pelN(pelId));
+  renderPelates();
+}
+
+// ΑΜΕΣΗ ΕΞΟΦΛΗΣΗ
+function saveOrderAndPay(){
+  var ps=document.getElementById('ord-pel');
+  var pelId=ps.value;
+  if(!pelId){toast('Επιλεξτε πελατη');return;}
+  if(!ordItems.length){toast('Επιλεξτε τουλαχιστον ενα ειδος');return;}
+  var date=document.getElementById('ord-date').value||today();
+  var notes=document.getElementById('ord-notes').value.trim();
+  var charged=ordItems.filter(function(i){return !i.kerasma;}).reduce(function(s,i){return s+i.price;},0);
+  var existing=DB.kiniseis.find(function(k){return k.pelatisId===pelId&&k.date===date&&!k.isMetafora;});
+  if(existing){existing.items=existing.items.concat(ordItems);if(notes)existing.notes=(existing.notes?existing.notes+' - ':'')+notes;}
+  else{DB.kiniseis.push({id:uid(),date:date,pelatisId:pelId,items:ordItems.slice(),notes:notes});}
+  if(charged>0){DB.pliromes.push({id:uid(),date:date,pelatisId:pelId,amount:charged,tropos:'cash',notes:'Αμεση εξοφληση'});}
+  saveDB();closeM('m-order');
+  toast('Εξοφληθηκε '+eur(charged)+' - '+pelN(pelId));
+}
+
+
+// AUTO SAVE
+var autoSaveTimer=null;
+var lastSaveTime=null;
+
+function updateSaveIndicator(success, timeStr){
+  var el=document.getElementById('last-save-indicator');
+  if(!el)return;
+  el.style.display='flex';
+  if(success){
+    el.innerHTML='☁️ <span style="color:#276749">Αποθ. '+timeStr+'</span>';
+    el.title='Τελευταία επιτυχημένη αποθήκευση: '+timeStr;
+  } else {
+    el.innerHTML='⚠️ <span style="color:#c53030;font-weight:700">Αποθήκευση απέτυχε!</span>';
+    el.title='Η αυτόματη αποθήκευση απέτυχε. Πάτα Drive Save χειροκίνητα!';
+  }
+}
+
+function autoSaveDrive(){
+  if(!gdToken)return;
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer=setTimeout(function(){
+    gdriveSave(true);
+  },3000);
+}
+
+// GOOGLE DRIVE SYNC
+var GD_CLIENT_ID = '274921385206-mdcr3bjekelrsb5k881l16fgfvd2bdoo.apps.googleusercontent.com';
+var GD_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+var GD_FILE_NAME = 'cafe-genesis-data.json';
+var gdToken = null;
+var gdFileId = null;
+
+function gdriveLogin(){
+  var client = google.accounts.oauth2.initTokenClient({
+    client_id: GD_CLIENT_ID,
+    scope: GD_SCOPE,
+    callback: function(resp){
+      if(resp.error){toast('Drive: Σφάλμα σύνδεσης');return;}
+      gdToken = resp.access_token;
+      document.getElementById('gdrive-login-btn').style.display='none';
+      document.getElementById('gdrive-save-btn').style.display='inline-flex';
+      document.getElementById('gdrive-load-btn').style.display='inline-flex';
+      var userEl = document.getElementById('gdrive-user');
+      userEl.style.display='flex';
+      userEl.textContent='Συνδεδεμένος';
+      toast('Drive: Συνδέθηκες!');
+    }
+  });
+  client.requestAccessToken();
+}
+
+function gdriveFindFile(cb){
+  // Προσθέτω timestamp για να αποφύγω cache
+  fetch('https://www.googleapis.com/drive/v3/files?q=name%3D%22'+GD_FILE_NAME+'%22+and+trashed%3Dfalse&fields=files(id,name,modifiedTime)&orderBy=modifiedTime+desc&t='+Date.now(), {
+    headers:{Authorization:'Bearer '+gdToken,'Cache-Control':'no-cache','Pragma':'no-cache'}
+  }).then(function(r){return r.json();}).then(function(d){
+    if(d.files&&d.files.length>0){
+      console.log('Found file:', d.files[0].id, 'modified:', d.files[0].modifiedTime);
+      cb(d.files[0].id);
+    } else {
+      console.log('No file found');
+      cb(null);
+    }
+  }).catch(function(e){
+    console.log('Find error:', e);
+    cb(null);
+  });
+}
+
+function gdriveSave(silent){
+  if(!gdToken){toast('Πρώτα συνδέσου στο Drive');return;}
+  if(!silent)toast('Drive: Αποθήκευση...');
+  var data = JSON.stringify(DB);
+  gdriveFindFile(function(fid){
+    var now=new Date();
+    var timeStr=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    if(fid){
+      fetch('https://www.googleapis.com/upload/drive/v3/files/'+fid+'?uploadType=media', {
+        method:'PATCH',
+        headers:{Authorization:'Bearer '+gdToken, 'Content-Type':'application/json'},
+        body:data
+      }).then(function(r){return r.json();})
+      .then(function(d){
+        updateSaveIndicator(true, timeStr);
+        if(!silent)toast('☁️ Drive: Αποθηκεύτηκε '+timeStr+'!');
+        else toast('☁️ Αυτόματη αποθήκευση '+timeStr);
+      }).catch(function(e){
+        updateSaveIndicator(false, timeStr);
+        toast('⚠️ Drive: Αποθήκευση απέτυχε! Πάτα Drive Save!', 5000);
+      });
+    } else {
+      var meta = {name: GD_FILE_NAME, mimeType: 'application/json'};
+      var form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(meta)],{type:'application/json'}));
+      form.append('file', new Blob([data],{type:'application/json'}));
+      fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method:'POST',
+        headers:{Authorization:'Bearer '+gdToken},
+        body:form
+      }).then(function(r){return r.json();})
+      .then(function(d){
+        gdFileId=d.id;
+        updateSaveIndicator(true, timeStr);
+        if(!silent)toast('☁️ Drive: Αποθηκεύτηκε '+timeStr+'!');
+        else toast('☁️ Αυτόματη αποθήκευση '+timeStr);
+      }).catch(function(e){
+        updateSaveIndicator(false, timeStr);
+        toast('⚠️ Drive: Αποθήκευση απέτυχε! Πάτα Drive Save!', 5000);
+      });
+    }
+  });
+}
+
+function gdriveLoad(){
+  if(!gdToken){toast('Πρώτα συνδέσου στο Drive');return;}
+  toast('Drive: Αναζήτηση...');
+  gdriveFindFile(function(fid){
+    if(!fid){toast('Drive: Δεν βρέθηκαν δεδομένα');return;}
+    // Πρώτα παίρνω τα metadata για να δω πότε τροποποιήθηκε
+    fetch('https://www.googleapis.com/drive/v3/files/'+fid+'?fields=modifiedTime,size',{
+      headers:{Authorization:'Bearer '+gdToken,'Cache-Control':'no-cache'}
+    }).then(function(r){return r.json();}).then(function(meta){
+      var modTime=meta.modifiedTime?new Date(meta.modifiedTime).toLocaleString('el-GR'):'';
+      // Τώρα φορτώνω τα δεδομένα
+      return fetch('https://www.googleapis.com/drive/v3/files/'+fid+'?alt=media&t='+Date.now(),{
+        headers:{Authorization:'Bearer '+gdToken,'Cache-Control':'no-cache','Pragma':'no-cache'}
+      }).then(function(r){return r.text();}).then(function(txt){
+        var d=JSON.parse(txt);
+        if(!d.pelates||!d.kiniseis){toast('Drive: Μη έγκυρα δεδομένα');return;}
+        if(!confirm('Φόρτωση από Drive;\n\nΤελευταία αποθήκευση: '+modTime+'\nΠελάτες: '+d.pelates.length+'\nΚινήσεις: '+d.kiniseis.length+'\n\nΤα τοπικά δεδομένα θα αντικατασταθούν.'))return;
+        DB=d;
+        if(!DB.promPliromes)DB.promPliromes=[];
+        saveDB();
+        initTameio();
+        goPage('tameio');
+        renderTameio();
+        toast('✅ Drive: Φορτώθηκαν '+d.kiniseis.length+' κινήσεις ('+modTime+')');
+      });
+    }).catch(function(e){
+      console.log('Load error:', e);
+      toast('Drive: Σφάλμα φόρτωσης');
+    });
+  });
+}
+
+// INIT
+loadDB();
+// Περιοδική αποθήκευση κάθε 5 λεπτά αν είναι συνδεδεμένο Drive
+setInterval(function(){
+  if(gdToken){
+    gdriveSave(true);
+  }
+}, 5*60*1000);
+// Υπενθύμιση backup κάθε ώρα αν ΔΕΝ είναι συνδεδεμένο Drive
+setInterval(function(){
+  if(!gdToken){
+    toast('💾 Θυμήσου να κάνεις Backup!', 4000);
+  }
+}, 60*60*1000);
+if(!DB.eidi.length){
+  DB.eidi=[
+    {id:uid(),kat:'ΚΑΦΕΔΕΣ',name:'FREDDO ESPRESSO',price:3.00,priceKer:2.50},
+    {id:uid(),kat:'ΚΑΦΕΔΕΣ',name:'FREDDO CAPPUCCINO',price:3.50,priceKer:3.00},
+    {id:uid(),kat:'ΚΑΦΕΔΕΣ',name:'ESPRESSO MONO',price:2.50,priceKer:2.00},
+    {id:uid(),kat:'ΚΑΦΕΔΕΣ',name:'CAPPUCCINO ΔΙΠΛΟ',price:4.00,priceKer:3.50},
+    {id:uid(),kat:'ΑΝΑΨΥΚΤΙΚΑ',name:'HELL',price:2.50,priceKer:2.00},
+    {id:uid(),kat:'ΑΝΑΨΥΚΤΙΚΑ',name:'RED BULL',price:3.00,priceKer:2.50},
+    {id:uid(),kat:'ΑΝΑΨΥΚΤΙΚΑ',name:'ΝΕΡΟ ΜΕΓΑΛΟ',price:1.00,priceKer:0.80},
+    {id:uid(),kat:'ΑΝΑΨΥΚΤΙΚΑ',name:'ΓΡΑΝΙΤΑ',price:2.50,priceKer:2.00},
+  ];
+  saveDB();
+}
+document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('el-GR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+initTameio();
+</script>
+</body>
+</html>
